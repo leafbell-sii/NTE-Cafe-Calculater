@@ -196,11 +196,11 @@ describe('최적화 = 브루트포스', () => {
   const foodsSmall = data.foods.filter((_, i) => i % 2 === 0 || i > 13); // 13개
 
   it('보유 12명 (10명 선택) · 음료 트렌드', () => {
-    const owned = data.characters.map((c, i) => ({ character: c, level: (i % 5) + 1 }));
+    const owned = data.characters.slice(0, 12).map((c, i) => ({ character: c, level: (i % 5) + 1 }));
     check(owned, trend('tag:음료'), 0.015, 20, foodsSmall);
   });
   it('보유 12명 · 전원 Lv5 · 트렌드 없음 (동점 다수)', () => {
-    const owned = data.characters.map((c) => ({ character: c, level: 5 }));
+    const owned = data.characters.slice(0, 12).map((c) => ({ character: c, level: 5 }));
     const groups = check(owned, NONE_TREND, 0, 15, foodsSmall);
     expect(groups.some((g) => g.alternatives.length > 0)).toBe(true);
   });
