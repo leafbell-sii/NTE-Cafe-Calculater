@@ -7,8 +7,7 @@
 ## 2. 참조
 - `.\docs\SPEC.md`
 - `.\docs\gameLogicData.md`
-- `.\docs\CharacterCitySkillsData.md`
-- `.\docs\FoodData.md`
+- `.\src\data\*.json` (게임 데이터)
 
 ## 3. 응답
 - 한국어로 응답
