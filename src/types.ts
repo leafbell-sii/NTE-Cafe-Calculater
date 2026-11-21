@@ -45,6 +45,7 @@ export interface TrendsData {
 export interface Constants {
   baseTraffic: number;
   trendBonus: number;
+  tagTrendBonus: number;
   maxFoods: number;
   maxStaff: number;
   maxSkillLevel: number;

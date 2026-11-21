@@ -204,7 +204,8 @@ interface TrendsData {
 // constants.json
 interface Constants {
   baseTraffic: number;    // 2400
-  trendBonus: number;     // 0.75
+  trendBonus: number;     // 0.75 (과일·재료 트렌드)
+  tagTrendBonus: number;  // 1.00 (태그 트렌드)
   maxFoods: number;       // 5
   maxStaff: number;       // 10
   maxSkillLevel: number;  // 5

@@ -68,6 +68,16 @@ describe('트렌드', () => {
     });
     expect(r.foods[0].trend).toBe(0.75);
   });
+  it('태그 트렌드 계수는 1.00', () => {
+    const r = calculate({
+      menu: [food('iced-mocha')],
+      staff: [],
+      trend: trend('tag:음료'),
+      popularity: 0,
+      constants: data.constants,
+    });
+    expect(r.foods[0].trend).toBe(1.0);
+  });
 });
 
 describe('계산', () => {
@@ -81,7 +91,7 @@ describe('계산', () => {
     ];
     const r = calculate({ menu, staff, trend: trend('tag:음료'), popularity: 0.015, constants: data.constants });
     const A = 0.12 + 0.18 + 0.12;
-    const foodCoef = 10.6 + 0.75 + A + (12.2 + 0.75 + A);
+    const foodCoef = 10.6 + 1.0 + A + (12.2 + 1.0 + A);
     const traffic = (2400 + 18) * (1 + 0.025);
     expect(r.revenue).toBeCloseTo(foodCoef * (traffic / 100) * 1.015, 10);
   });

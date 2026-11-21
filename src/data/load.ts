@@ -49,6 +49,7 @@ const trendsSchema = z.object({
 const constantsSchema = z.object({
   baseTraffic: nonNeg,
   trendBonus: nonNeg,
+  tagTrendBonus: nonNeg,
   maxFoods: z.number().int().min(1),
   maxStaff: z.number().int().min(1),
   maxSkillLevel: z.number().int().min(1),

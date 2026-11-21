@@ -1,5 +1,5 @@
 import type { Condition, Constants, EffectKind, Food, SkillEffect, Staff, Trend } from '../types';
-import { trendApplies } from './trends';
+import { trendBonus } from './trends';
 
 /** 부동소수 비교 오차 (SPEC 6.1) */
 export const EPS = 1e-9;
@@ -44,7 +44,7 @@ export function staffBuffs(staff: Staff, menu: Food[]): Buffs {
 
 /** 음식 하나의 기본값: 가격 + 트렌드 계수 */
 export function foodBase(food: Food, trend: Trend, constants: Constants): number {
-  return food.price + (trendApplies(trend, food) ? constants.trendBonus : 0);
+  return food.price + trendBonus(trend, food, constants);
 }
 
 /**
@@ -118,7 +118,7 @@ export function calculate({ menu, staff, trend, popularity, constants }: CalcInp
   const traffic = (constants.baseTraffic + buffs.trafficAdd) * (1 + buffs.trafficMul);
   const trafficCoef = traffic / 100;
   const foods: FoodLine[] = menu.map((food) => {
-    const t = trendApplies(trend, food) ? constants.trendBonus : 0;
+    const t = trendBonus(trend, food, constants);
     const subtotal = food.price + t + buffs.priceAdd;
     return {
       food,

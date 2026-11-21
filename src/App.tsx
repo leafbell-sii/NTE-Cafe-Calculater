@@ -57,7 +57,7 @@ function Calculator({ data }: { data: GameData }) {
 
       <footer className="footer">
         <span>
-          기본 유동인구 {data.constants.baseTraffic}P · 트렌드 계수 +{data.constants.trendBonus}
+          기본 유동인구 {data.constants.baseTraffic}P · 트렌드 계수 +{data.constants.trendBonus} (태그 +{data.constants.tagTrendBonus.toFixed(2)})
         </span>
         <button className="link-quiet" onClick={() => setMode(mode === 'optimize' ? 'manual' : 'optimize')}>
           {mode === 'optimize' ? '수동 계산' : '최적화로 돌아가기'}

@@ -1,4 +1,4 @@
-import { TAGS, type Food, type GameData, type Trend } from '../types';
+import { TAGS, type Constants, type Food, type GameData, type Trend } from '../types';
 
 export const NONE_TREND: Trend = { id: 'none', label: '없음', kind: 'none', match: { type: 'none' } };
 
@@ -37,4 +37,14 @@ export function trendApplies(trend: Trend, food: Food): boolean {
     case 'ingredientAny':
       return food.ingredients.some((i) => m.ingredients.includes(i));
   }
+}
+
+/** 트렌드 종류별 계수 (태그 트렌드 1.00, 그 외 0.75) */
+export function trendCoef(trend: Trend, constants: Constants): number {
+  return trend.kind === 'tag' ? constants.tagTrendBonus : constants.trendBonus;
+}
+
+/** 음식에 적용되는 트렌드 계수 (미적용 시 0) */
+export function trendBonus(trend: Trend, food: Food, constants: Constants): number {
+  return trendApplies(trend, food) ? trendCoef(trend, constants) : 0;
 }
