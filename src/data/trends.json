@@ -1,0 +1,9 @@
+{
+  "ingredientGroups": [
+    {
+      "id": "fruit",
+      "label": "과일",
+      "ingredients": ["코코넛", "사과", "토마토", "오렌지", "딸기"]
+    }
+  ]
+}
