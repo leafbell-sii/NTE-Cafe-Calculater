@@ -106,6 +106,17 @@ describe('계산', () => {
     });
     expect(r.buffs.priceAdd).toBeCloseTo(0.6, 12);
   });
+  it('트렌드 계수는 판매가 곱연산 뒤에 더한다 (인게임 티라미수 19.87)', () => {
+    // 라크리모사·나나리 제외 전원 Lv5, 커피 원두 트렌드 1등 조합
+    const menu = ['hot-orange-coffee', 'crispy-coconut-cookie-macchiato', 'snowy-matcha-latte', 'tiramisu', 'caramel-choco-crepe'].map(food);
+    const staff: Staff[] = ['sakiri', 'baekjang', 'daffodil', 'edgar', 'shinku', 'rinko', 'akane-rin', 'umitsuki', 'haniel', 'iroi'].map(
+      (id) => ({ character: byId(id), level: 5 }),
+    );
+    const r = calculate({ menu, staff, trend: trend('ingredient:커피 원두'), popularity: 0, constants: data.constants });
+    const tira = r.foods.find((f) => f.food.id === 'tiramisu')!;
+    expect(tira.coef).toBeCloseTo((17 + 1.56) * 1.03 + 0.75, 10);
+    expect(tira.coef.toFixed(2)).toBe('19.87');
+  });
   it('조건 미충족 효과는 met=false로 남는다', () => {
     const r = calculate({
       menu: [food('apple-pie')],

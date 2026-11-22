@@ -42,23 +42,19 @@ export function staffBuffs(staff: Staff, menu: Food[]): Buffs {
   return b;
 }
 
-/** 음식 하나의 기본값: 가격 + 트렌드 계수 */
-export function foodBase(food: Food, trend: Trend, constants: Constants): number {
-  return food.price + trendBonus(trend, food, constants);
-}
-
 /**
- * 최종 수익 (인수분해한 형태).
- * Σ(base_i + A)(1 + M) = (Σbase_i + n·A)(1 + M)
+ * 최종 수익 (인수분해한 형태). 트렌드 계수는 판매가 곱연산 뒤에 더한다.
+ * Σ[(price_i + A)(1 + M) + trend_i] = (Σprice_i + n·A)(1 + M) + Σtrend_i
  */
 export function revenueOf(
-  baseSum: number,
+  priceSum: number,
+  trendSum: number,
   foodCount: number,
   b: Buffs,
   constants: Constants,
   popularity: number,
 ): number {
-  const foodCoef = (baseSum + foodCount * b.priceAdd) * (1 + b.priceMul);
+  const foodCoef = (priceSum + foodCount * b.priceAdd) * (1 + b.priceMul) + trendSum;
   const trafficCoef = ((constants.baseTraffic + b.trafficAdd) * (1 + b.trafficMul)) / 100;
   return foodCoef * trafficCoef * (1 + popularity);
 }
@@ -76,10 +72,12 @@ export interface EffectLine {
 export interface FoodLine {
   food: Food;
   price: number;
-  trend: number;
   priceAdd: number;
+  /** 가격 + 판매가 합연산 */
   subtotal: number;
   priceMul: number;
+  /** 판매가 곱연산 뒤에 더해지는 트렌드 계수 */
+  trend: number;
   coef: number;
 }
 
@@ -119,15 +117,15 @@ export function calculate({ menu, staff, trend, popularity, constants }: CalcInp
   const trafficCoef = traffic / 100;
   const foods: FoodLine[] = menu.map((food) => {
     const t = trendBonus(trend, food, constants);
-    const subtotal = food.price + t + buffs.priceAdd;
+    const subtotal = food.price + buffs.priceAdd;
     return {
       food,
       price: food.price,
-      trend: t,
       priceAdd: buffs.priceAdd,
       subtotal,
       priceMul: buffs.priceMul,
-      coef: subtotal * (1 + buffs.priceMul),
+      trend: t,
+      coef: subtotal * (1 + buffs.priceMul) + t,
     };
   });
   const totalFoodCoef = foods.reduce((s, f) => s + f.coef, 0);
