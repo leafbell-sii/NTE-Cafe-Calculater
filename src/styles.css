@@ -505,6 +505,13 @@ code {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.share {
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .row-delta {
   color: var(--text-3);
   font-size: 12px;

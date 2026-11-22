@@ -4,6 +4,7 @@ import { optimize } from '../logic/optimize';
 import { ResultCard } from './ResultCard';
 import { LevelSelect } from './LevelSelect';
 import { Portrait } from './Portrait';
+import { idMap, isLevel, usePersistentState } from '../persist';
 
 interface Props {
   data: GameData;
@@ -16,11 +17,16 @@ const STEP = 10;
 
 export function OptimizeMode({ data, trend, popularity }: Props) {
   const max = data.constants.maxSkillLevel;
-  const [owned, setOwned] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(data.characters.map((c) => [c.id, true])),
+  const ids = data.characters.map((c) => c.id);
+  const [owned, setOwned] = usePersistentState<Record<string, boolean>>(
+    'optimize.owned',
+    () => Object.fromEntries(ids.map((id) => [id, true])),
+    idMap(ids, (v): v is boolean => typeof v === 'boolean', true),
   );
-  const [levels, setLevels] = useState<Record<string, number>>(() =>
-    Object.fromEntries(data.characters.map((c) => [c.id, max])),
+  const [levels, setLevels] = usePersistentState<Record<string, number>>(
+    'optimize.levels',
+    () => Object.fromEntries(ids.map((id) => [id, max])),
+    idMap(ids, isLevel(max), max),
   );
   const [shown, setShown] = useState(INITIAL);
 

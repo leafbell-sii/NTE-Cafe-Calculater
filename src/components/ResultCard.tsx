@@ -3,7 +3,7 @@ import type { Food, GameData, Staff, Tag, Trend } from '../types';
 import { calculate } from '../logic/calc';
 import { swapLines } from '../logic/optimize';
 import { trendApplies } from '../logic/trends';
-import { fmt2 } from '../format';
+import { fmt2, pct2 } from '../format';
 import { ReceiptView } from './Receipt';
 import { Portrait } from './Portrait';
 
@@ -45,6 +45,8 @@ export function ResultCard({ data, trend, popularity, menu, staff, rank, alterna
   );
 
   const Tag = rank === undefined ? 'div' : 'li';
+  // 1위 수익을 100%로 본 비율 (최적화 결과에만)
+  const share = rank === undefined ? undefined : base ? (base.revenue > 0 ? receipt.revenue / base.revenue : 1) : 1;
 
   if (!open) {
     return (
@@ -52,6 +54,7 @@ export function ResultCard({ data, trend, popularity, menu, staff, rank, alterna
         <button className="row-btn" aria-expanded={false} onClick={() => setOpen(true)}>
           {rank !== undefined && <span className="rank">{rank}위</span>}
           <span className="revenue-num">{fmt2(receipt.revenue)}</span>
+          {share !== undefined && <span className="share">{pct2(share)}</span>}
           {base && <span className="row-delta">−{fmt2(base.revenue - receipt.revenue)}</span>}
           <span className="row-menu">{base ? <RowDiff menu={menu} staff={staff} base={base} /> : menu.map((f) => f.name).join(' · ')}</span>
           <span className="chev" aria-hidden>
@@ -69,6 +72,7 @@ export function ResultCard({ data, trend, popularity, menu, staff, rank, alterna
         <div className="revenue">
           <span className="revenue-num">{fmt2(receipt.revenue)}</span>
           <span className="revenue-unit">폰즈/시간</span>
+          {share !== undefined && <span className="share">{pct2(share)}</span>}
         </div>
         {collapsible && (
           <button className="collapse-btn" aria-expanded onClick={() => setOpen(false)} aria-label="접기">

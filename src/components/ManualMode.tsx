@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { GameData, Staff, Trend } from '../types';
 import { ResultCard } from './ResultCard';
 import { LevelSelect } from './LevelSelect';
 import { Portrait } from './Portrait';
+import { isLevel, slots, usePersistentState } from '../persist';
 
 interface Props {
   data: GameData;
@@ -10,11 +11,27 @@ interface Props {
   popularity: number;
 }
 
+/** 빈 칸('') 또는 존재하는 id이면서 앞 칸과 겹치지 않는 값 */
+const uniqueIdOf = (ids: string[]) => (v: unknown, i: number, arr: unknown[]) =>
+  v === '' || (typeof v === 'string' && ids.includes(v) && arr.indexOf(v) === i);
+
 export function ManualMode({ data, trend, popularity }: Props) {
   const { maxFoods, maxStaff, maxSkillLevel } = data.constants;
-  const [foodIds, setFoodIds] = useState<string[]>(() => Array(maxFoods).fill(''));
-  const [staffIds, setStaffIds] = useState<string[]>(() => Array(maxStaff).fill(''));
-  const [levels, setLevels] = useState<number[]>(() => Array(maxStaff).fill(maxSkillLevel));
+  const [foodIds, setFoodIds] = usePersistentState<string[]>(
+    'manual.foodIds',
+    () => Array(maxFoods).fill(''),
+    slots(maxFoods, uniqueIdOf(data.foods.map((f) => f.id)), ''),
+  );
+  const [staffIds, setStaffIds] = usePersistentState<string[]>(
+    'manual.staffIds',
+    () => Array(maxStaff).fill(''),
+    slots(maxStaff, uniqueIdOf(data.characters.map((c) => c.id)), ''),
+  );
+  const [levels, setLevels] = usePersistentState<number[]>(
+    'manual.levels',
+    () => Array(maxStaff).fill(maxSkillLevel),
+    slots(maxStaff, isLevel(maxSkillLevel), maxSkillLevel),
+  );
 
   const menu = useMemo(
     () => foodIds.filter(Boolean).map((id) => data.foods.find((f) => f.id === id)!),

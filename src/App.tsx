@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { loadGameData } from './data/load';
 import type { GameData } from './types';
 import { buildTrends, NONE_TREND } from './logic/trends';
@@ -6,6 +6,7 @@ import { CommonInputs } from './components/CommonInputs';
 import { OptimizeMode } from './components/OptimizeMode';
 import { ManualMode } from './components/ManualMode';
 import { DataErrors } from './components/DataErrors';
+import { nonNegNumber, oneOf, usePersistentState } from './persist';
 
 const loaded = loadGameData();
 
@@ -14,13 +15,16 @@ export default function App() {
   return <Calculator data={loaded.data} />;
 }
 
-type Mode = 'optimize' | 'manual';
+const MODES = ['optimize', 'manual'] as const;
+type Mode = (typeof MODES)[number];
 
 function Calculator({ data }: { data: GameData }) {
   const trends = useMemo(() => buildTrends(data), [data]);
-  const [mode, setMode] = useState<Mode>('optimize');
-  const [popularity, setPopularity] = useState(0);
-  const [trendId, setTrendId] = useState(NONE_TREND.id);
+  const [mode, setMode] = usePersistentState<Mode>('mode', () => 'optimize', oneOf(MODES));
+  const [popularity, setPopularity] = usePersistentState('popularity', () => 0, nonNegNumber);
+  const [trendId, setTrendId] = usePersistentState('trendId', () => NONE_TREND.id, (v) =>
+    trends.some((t) => t.id === v) ? (v as string) : undefined,
+  );
   const trend = trends.find((t) => t.id === trendId) ?? NONE_TREND;
 
   return (
