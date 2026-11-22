@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 // SPEC 2: 입력값을 localStorage에 자동 저장하고 다시 들어오면 복원한다.
-const PREFIX = 'nte-cafe:v1:';
+export const PREFIX = 'nte-cafe:v1:';
 
 function read(key: string): unknown {
   try {
