@@ -3,6 +3,7 @@ import type { GameData, Staff, Trend } from '../types';
 import { optimize } from '../logic/optimize';
 import { ResultCard } from './ResultCard';
 import { LevelSelect } from './LevelSelect';
+import { Portrait } from './Portrait';
 
 interface Props {
   data: GameData;
@@ -78,8 +79,11 @@ export function OptimizeMode({ data, trend, popularity, common }: Props) {
                       checked={on}
                       onChange={(e) => setOwned({ ...owned, [c.id]: e.target.checked })}
                     />
-                    <span className="char-name">{c.name}</span>
-                    <span className="char-skill">{c.skillName}</span>
+                    <Portrait id={c.id} name={c.name} />
+                    <span className="char-text">
+                      <span className="char-name">{c.name}</span>
+                      <span className="char-skill">{c.skillName}</span>
+                    </span>
                   </label>
                   <LevelSelect
                     max={max}
