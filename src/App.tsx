@@ -23,35 +23,35 @@ function Calculator({ data }: { data: GameData }) {
   const [trendId, setTrendId] = useState(NONE_TREND.id);
   const trend = trends.find((t) => t.id === trendId) ?? NONE_TREND;
 
-  const common = (
-    <CommonInputs
-      trends={trends}
-      trendId={trendId}
-      onTrend={setTrendId}
-      popularity={popularity}
-      onPopularity={setPopularity}
-    />
-  );
-
   return (
     <div className="app">
       <header className="header">
         <span className="logo" aria-hidden>
           ☕
         </span>
-        <div>
-          <h1>별미 카페 계산기</h1>
-          <p className="subtitle">
-            {mode === 'optimize' ? '보유 캐릭터로 시간당 수익이 가장 높은 메뉴·직원 조합 찾기' : '수동 계산 · 테스트용'}
-          </p>
+        <h1>별미 카페 계산기</h1>
+        <CommonInputs
+          trends={trends}
+          trendId={trendId}
+          onTrend={setTrendId}
+          popularity={popularity}
+          onPopularity={setPopularity}
+        />
+        <div className="mode-toggle" role="group" aria-label="모드">
+          <button aria-pressed={mode === 'optimize'} onClick={() => setMode('optimize')}>
+            최적화
+          </button>
+          <button aria-pressed={mode === 'manual'} onClick={() => setMode('manual')}>
+            수동
+          </button>
         </div>
       </header>
 
       <main className="layout">
         {mode === 'optimize' ? (
-          <OptimizeMode data={data} trend={trend} popularity={popularity} common={common} />
+          <OptimizeMode data={data} trend={trend} popularity={popularity} />
         ) : (
-          <ManualMode data={data} trend={trend} popularity={popularity} common={common} />
+          <ManualMode data={data} trend={trend} popularity={popularity} />
         )}
       </main>
 
@@ -59,9 +59,6 @@ function Calculator({ data }: { data: GameData }) {
         <span>
           기본 유동인구 {data.constants.baseTraffic}P · 트렌드 계수 +{data.constants.trendBonus} (태그 +{data.constants.tagTrendBonus.toFixed(2)})
         </span>
-        <button className="link-quiet" onClick={() => setMode(mode === 'optimize' ? 'manual' : 'optimize')}>
-          {mode === 'optimize' ? '수동 계산' : '최적화로 돌아가기'}
-        </button>
       </footer>
     </div>
   );

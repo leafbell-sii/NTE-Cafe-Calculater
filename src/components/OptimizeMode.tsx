@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import type { GameData, Staff, Trend } from '../types';
 import { optimize } from '../logic/optimize';
 import { ResultCard } from './ResultCard';
@@ -9,13 +9,12 @@ interface Props {
   data: GameData;
   trend: Trend;
   popularity: number;
-  common: ReactNode;
 }
 
 const INITIAL = 5;
 const STEP = 10;
 
-export function OptimizeMode({ data, trend, popularity, common }: Props) {
+export function OptimizeMode({ data, trend, popularity }: Props) {
   const max = data.constants.maxSkillLevel;
   const [owned, setOwned] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(data.characters.map((c) => [c.id, true])),
@@ -52,40 +51,40 @@ export function OptimizeMode({ data, trend, popularity, common }: Props) {
   return (
     <>
       <aside className="panel inputs">
-        {common}
         <section>
           <div className="section-head">
-            <h2>보유 캐릭터</h2>
-            <span className="count">
-              {ownedCount}/{data.characters.length}
-            </span>
+            <h2>
+              보유 캐릭터{' '}
+              <span className="count">
+                {ownedCount}/{data.characters.length}
+              </span>
+            </h2>
+            <div className="row-actions">
+              <button className="chip-btn" onClick={() => setAll(true)}>
+                전체 선택
+              </button>
+              <button className="chip-btn" onClick={() => setAll(false)}>
+                전체 해제
+              </button>
+            </div>
           </div>
-          <div className="row-actions">
-            <button className="chip-btn" onClick={() => setAll(true)}>
-              전체 선택
-            </button>
-            <button className="chip-btn" onClick={() => setAll(false)}>
-              전체 해제
-            </button>
-          </div>
-          <ul className="char-list">
+          <ul className="char-grid">
             {data.characters.map((c) => {
               const on = !!owned[c.id];
               return (
-                <li key={c.id} className={on ? 'char on' : 'char'}>
-                  <label className="char-check" title={c.skillText.join('\n')}>
+                <li key={c.id} className={on ? 'tile on' : 'tile'}>
+                  <label className="tile-check" title={[c.skillName, ...c.skillText].join('\n')}>
                     <input
                       type="checkbox"
+                      className="sr-only"
                       checked={on}
                       onChange={(e) => setOwned({ ...owned, [c.id]: e.target.checked })}
                     />
                     <Portrait id={c.id} name={c.name} />
-                    <span className="char-text">
-                      <span className="char-name">{c.name}</span>
-                      <span className="char-skill">{c.skillName}</span>
-                    </span>
+                    <span className="tile-name">{c.name}</span>
                   </label>
                   <LevelSelect
+                    className="tile-lv"
                     max={max}
                     value={levels[c.id]}
                     disabled={!on}
@@ -124,6 +123,8 @@ export function OptimizeMode({ data, trend, popularity, common }: Props) {
                 staff={g.staff}
                 alternatives={g.alternatives}
                 featured={i === 0}
+                collapsible={i > 0}
+                base={i > 0 ? groups[0] : undefined}
               />
             ))}
           </ol>

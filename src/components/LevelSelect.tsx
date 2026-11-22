@@ -4,12 +4,13 @@ interface Props {
   onChange: (v: number) => void;
   disabled?: boolean;
   label: string;
+  className?: string;
 }
 
-export function LevelSelect({ max, value, onChange, disabled, label }: Props) {
+export function LevelSelect({ max, value, onChange, disabled, label, className }: Props) {
   return (
     <select
-      className="level-select"
+      className={`level-select${className ? ` ${className}` : ''}`}
       value={value}
       disabled={disabled}
       aria-label={label}

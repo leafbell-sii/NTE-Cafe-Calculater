@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import type { GameData, Staff, Trend } from '../types';
 import { ResultCard } from './ResultCard';
 import { LevelSelect } from './LevelSelect';
@@ -8,10 +8,9 @@ interface Props {
   data: GameData;
   trend: Trend;
   popularity: number;
-  common: ReactNode;
 }
 
-export function ManualMode({ data, trend, popularity, common }: Props) {
+export function ManualMode({ data, trend, popularity }: Props) {
   const { maxFoods, maxStaff, maxSkillLevel } = data.constants;
   const [foodIds, setFoodIds] = useState<string[]>(() => Array(maxFoods).fill(''));
   const [staffIds, setStaffIds] = useState<string[]>(() => Array(maxStaff).fill(''));
@@ -35,7 +34,6 @@ export function ManualMode({ data, trend, popularity, common }: Props) {
   return (
     <>
       <aside className="panel inputs">
-        {common}
         <section>
           <div className="section-head">
             <h2>메뉴</h2>
@@ -70,32 +68,39 @@ export function ManualMode({ data, trend, popularity, common }: Props) {
               {staff.length}/{maxStaff}
             </span>
           </div>
-          <ul className="slot-list">
-            {staffIds.map((id, i) => (
-              <li key={i}>
-                <span className="slot-no">{i + 1}</span>
-                <Portrait id={id || undefined} className="slot-portrait" />
-                <select
-                  value={id}
-                  aria-label={`직원 ${i + 1}`}
-                  onChange={(e) => setStaffIds(setAt(staffIds, i, e.target.value))}
-                >
-                  <option value="">— 비움 —</option>
-                  {data.characters.map((c) => (
-                    <option key={c.id} value={c.id} disabled={c.id !== id && staffIds.includes(c.id)}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                <LevelSelect
-                  max={maxSkillLevel}
-                  value={levels[i]}
-                  disabled={!id}
-                  onChange={(v) => setLevels(setAt(levels, i, v))}
-                  label={`직원 ${i + 1} 레벨`}
-                />
-              </li>
-            ))}
+          <ul className="char-grid staff-grid">
+            {staffIds.map((id, i) => {
+              const c = id ? data.characters.find((x) => x.id === id) : undefined;
+              return (
+                <li key={i} className={c ? 'tile on' : 'tile'}>
+                  <div className="tile-check">
+                    <Portrait id={id || undefined} name={c ? c.name : '+'} />
+                    <span className="tile-name">{c ? c.name : `직원 ${i + 1}`}</span>
+                    <select
+                      className="tile-picker"
+                      value={id}
+                      aria-label={`직원 ${i + 1}`}
+                      onChange={(e) => setStaffIds(setAt(staffIds, i, e.target.value))}
+                    >
+                      <option value="">— 비움 —</option>
+                      {data.characters.map((ch) => (
+                        <option key={ch.id} value={ch.id} disabled={ch.id !== id && staffIds.includes(ch.id)}>
+                          {ch.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <LevelSelect
+                    className="tile-lv"
+                    max={maxSkillLevel}
+                    value={levels[i]}
+                    disabled={!id}
+                    onChange={(v) => setLevels(setAt(levels, i, v))}
+                    label={`직원 ${i + 1} 레벨`}
+                  />
+                </li>
+              );
+            })}
           </ul>
         </section>
       </aside>

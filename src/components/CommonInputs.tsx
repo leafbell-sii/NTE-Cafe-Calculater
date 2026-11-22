@@ -32,24 +32,22 @@ export function CommonInputs({ trends, trendId, onTrend, popularity, onPopularit
   const kinds = ['tag', 'group', 'ingredient'] as const;
 
   return (
-    <section className="common-inputs">
-      <label className="field">
-        <span className="field-label">인기도 계수</span>
+    <div className="common-inputs">
+      <label className="hfield">
+        <span className="hfield-label">인기도</span>
         <input
           type="text"
           inputMode="decimal"
           placeholder="0"
           value={text}
           onChange={(e) => onText(e.target.value)}
-          aria-describedby="pop-help"
+          title="게임 표기 그대로 (예: 0.015)"
         />
-        <span id="pop-help" className="field-help">
-          게임 표기 그대로 (예: 0.015) · 최종 ×{exact.format(1 + popularity)}
-        </span>
+        <span className="hfield-help">×{exact.format(1 + popularity)}</span>
       </label>
 
-      <label className="field">
-        <span className="field-label">트렌드</span>
+      <label className="hfield">
+        <span className="hfield-label">트렌드</span>
         <select value={trendId} onChange={(e) => onTrend(e.target.value)}>
           {none.map((t) => (
             <option key={t.id} value={t.id}>
@@ -69,6 +67,6 @@ export function CommonInputs({ trends, trendId, onTrend, popularity, onPopularit
           ))}
         </select>
       </label>
-    </section>
+    </div>
   );
 }
