@@ -3,3 +3,4 @@ dist
 *.tsbuildinfo
 .vercel
 .claude
+src/data/characterImages
