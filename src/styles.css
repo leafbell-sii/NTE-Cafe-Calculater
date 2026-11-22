@@ -259,6 +259,10 @@ code {
   cursor: pointer;
   color: var(--text-2);
 }
+.report-btn {
+  text-decoration: none;
+  white-space: nowrap;
+}
 .chip-btn:hover {
   border-color: var(--accent);
   color: var(--accent);

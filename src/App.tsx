@@ -6,6 +6,7 @@ import { CommonInputs } from './components/CommonInputs';
 import { OptimizeMode } from './components/OptimizeMode';
 import { ManualMode } from './components/ManualMode';
 import { DataErrors } from './components/DataErrors';
+import { BUG_REPORT_URL } from './config';
 import { nonNegNumber, oneOf, usePersistentState } from './persist';
 
 const loaded = loadGameData();
@@ -63,6 +64,11 @@ function Calculator({ data }: { data: GameData }) {
         <span>
           기본 유동인구 {data.constants.baseTraffic}P · 트렌드 계수 +{data.constants.trendBonus} (태그 +{data.constants.tagTrendBonus.toFixed(2)})
         </span>
+        {BUG_REPORT_URL && (
+          <a className="chip-btn report-btn" href={BUG_REPORT_URL} target="_blank" rel="noopener noreferrer">
+            🐞 버그 제보
+          </a>
+        )}
       </footer>
     </div>
   );
