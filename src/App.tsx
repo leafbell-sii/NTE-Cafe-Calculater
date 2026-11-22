@@ -7,7 +7,7 @@ import { OptimizeMode } from './components/OptimizeMode';
 import { ManualMode } from './components/ManualMode';
 import { DataErrors } from './components/DataErrors';
 import { BUG_REPORT_URL } from './config';
-import { buildShareUrl, copyText } from './share';
+import { applyShareCode, buildShareUrl, copyText } from './share';
 import { nonNegNumber, oneOf, usePersistentState } from './persist';
 
 const loaded = loadGameData();
@@ -66,6 +66,7 @@ function Calculator({ data }: { data: GameData }) {
           기본 유동인구 {data.constants.baseTraffic}P · 트렌드 계수 +{data.constants.trendBonus} (태그 +{data.constants.tagTrendBonus.toFixed(2)})
         </span>
         <div className="footer-actions">
+          <ShareCodeInput />
           <ShareButton />
           {BUG_REPORT_URL && (
             <a className="chip-btn report-btn" href={BUG_REPORT_URL} target="_blank" rel="noopener noreferrer">
@@ -75,6 +76,35 @@ function Calculator({ data }: { data: GameData }) {
         </div>
       </footer>
     </div>
+  );
+}
+
+function ShareCodeInput() {
+  const [text, setText] = useState('');
+  const [error, setError] = useState(false);
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!text.trim()) return;
+    if (applyShareCode(text)) location.reload();
+    else setError(true);
+  };
+  return (
+    <form className="share-apply" onSubmit={onSubmit}>
+      <input
+        type="text"
+        value={text}
+        placeholder="공유 링크 또는 코드"
+        aria-label="설정 공유 링크 또는 코드"
+        aria-invalid={error}
+        onChange={(e) => {
+          setText(e.target.value);
+          setError(false);
+        }}
+      />
+      <button type="submit" className="chip-btn" disabled={!text.trim()}>
+        {error ? '잘못된 코드' : '적용'}
+      </button>
+    </form>
   );
 }
 

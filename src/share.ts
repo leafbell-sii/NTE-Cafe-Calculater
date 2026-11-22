@@ -136,27 +136,40 @@ export function buildShareUrl(): string {
   return url.toString();
 }
 
+/**
+ * 공유 링크/코드를 해석해 저장할 값으로 바꾼다. 해석할 수 없으면 undefined.
+ * 받는 형태: 전체 URL, `#c=…`, `c=…`, 코드만(`AQIC…` → 압축 형식으로 간주)
+ */
+export function parseShareCode(text: string, data: GameData | undefined): Stored | undefined {
+  const t = text.trim();
+  const m = t.match(/(?:^|[#&?])([cs])=([A-Za-z0-9_-]+)/) ?? t.match(/^()([A-Za-z0-9_-]+)$/);
+  if (!m) return undefined;
+  try {
+    if (m[1] === LEGACY) {
+      const parsed: unknown = JSON.parse(new TextDecoder().decode(b64UrlToBytes(m[2])));
+      return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) ? (parsed as Stored) : undefined;
+    }
+    return data ? decodeCompact(m[2], data) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** 해석한 설정을 localStorage에 덮어쓴다. 성공 여부를 돌려준다. (화면 반영은 새로고침 필요) */
+export function applyShareCode(text: string): boolean {
+  const loaded = loadGameData();
+  const state = parseShareCode(text, loaded.ok ? loaded.data : undefined);
+  if (!state) return false;
+  for (const [k, v] of Object.entries(state)) {
+    if (v !== undefined) localStorage.setItem(PREFIX + k, JSON.stringify(v));
+  }
+  return true;
+}
+
 /** 앱 렌더 전에 호출: URL에 공유 설정이 있으면 적용하고 해시를 지운다 */
 export function applySharedState() {
-  const m = location.hash.match(/[#&]([cs])=([A-Za-z0-9_-]+)/);
-  if (!m) return;
-  try {
-    let state: Stored | undefined;
-    if (m[1] === COMPACT) {
-      const loaded = loadGameData();
-      state = loaded.ok ? decodeCompact(m[2], loaded.data) : undefined;
-    } else {
-      const parsed: unknown = JSON.parse(new TextDecoder().decode(b64UrlToBytes(m[2])));
-      state = asRecord(parsed);
-    }
-    if (state) {
-      for (const [k, v] of Object.entries(state)) {
-        if (v !== undefined) localStorage.setItem(PREFIX + k, JSON.stringify(v));
-      }
-    }
-  } catch {
-    // 잘못된 링크는 무시
-  }
+  if (!/[#&][cs]=/.test(location.hash)) return;
+  applyShareCode(location.hash);
   history.replaceState(null, '', location.pathname + location.search);
 }
 

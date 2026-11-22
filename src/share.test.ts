@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData } from './data/load';
-import { decodeCompact, encodeCompact } from './share';
+import { decodeCompact, encodeCompact, parseShareCode } from './share';
 
 const loaded = loadGameData();
 if (!loaded.ok) throw new Error(JSON.stringify(loaded.errors));
@@ -44,5 +44,17 @@ describe('설정 공유 압축', () => {
   it('잘린 링크는 예외', () => {
     const code = encodeCompact(optimizeOnly, data)!;
     expect(() => decodeCompact(code.slice(0, 4), data)).toThrow();
+  });
+
+  it('입력 형태: URL, 해시, 코드만, 구 형식', () => {
+    const code = encodeCompact(optimizeOnly, data)!;
+    for (const t of [`https://x.app/#c=${code}`, `#c=${code}`, `c=${code}`, `  ${code}
+`]) {
+      expect(parseShareCode(t, data)).toEqual(optimizeOnly);
+    }
+    const legacy = btoa(JSON.stringify({ popularity: 0.5 })).replace(/=+$/, '');
+    expect(parseShareCode(`https://x.app/#s=${legacy}`, data)).toEqual({ popularity: 0.5 });
+    expect(parseShareCode('아무거나', data)).toBeUndefined();
+    expect(parseShareCode('', data)).toBeUndefined();
   });
 });

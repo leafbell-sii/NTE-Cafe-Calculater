@@ -263,6 +263,33 @@ code {
   display: flex;
   gap: 6px;
 }
+.footer-actions {
+  flex-wrap: wrap;
+  align-items: center;
+}
+.share-apply {
+  display: flex;
+  gap: 4px;
+}
+.share-apply input {
+  width: 170px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  outline: none;
+}
+.share-apply input:focus {
+  border-color: var(--accent);
+}
+.share-apply input[aria-invalid='true'] {
+  border-color: var(--bad, #e5484d);
+}
+.share-apply .chip-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 .report-btn {
   text-decoration: none;
   white-space: nowrap;
