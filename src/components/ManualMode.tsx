@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import type { GameData, Staff, Trend } from '../types';
 import { ResultCard } from './ResultCard';
 import { LevelSelect } from './LevelSelect';
+import { Portrait } from './Portrait';
 
 interface Props {
   data: GameData;
@@ -73,6 +74,7 @@ export function ManualMode({ data, trend, popularity, common }: Props) {
             {staffIds.map((id, i) => (
               <li key={i}>
                 <span className="slot-no">{i + 1}</span>
+                <Portrait id={id || undefined} className="slot-portrait" />
                 <select
                   value={id}
                   aria-label={`직원 ${i + 1}`}
