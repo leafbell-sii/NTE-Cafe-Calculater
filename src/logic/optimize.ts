@@ -1,5 +1,6 @@
 import type { Constants, Food, Staff, Trend } from '../types';
-import { EPS, foodBase, revenueOf, staffBuffs, type Buffs } from './calc';
+import { EPS, revenueOf, staffBuffs, type Buffs } from './calc';
+import { trendBonus } from './trends';
 
 /** 소요 시간 경고 기준 (SPEC 6.3, 게임 데이터가 아니므로 코드 상수) */
 export const SLOW_WARN_MS = 2000;
@@ -107,22 +108,24 @@ export function optimize(input: OptimizeInput): OptimizeOutput {
   const { foods, owned, trend, popularity, constants, k } = input;
   const menuSize = Math.min(constants.maxFoods, foods.length);
   const slots = Math.min(constants.maxStaff, owned.length);
-  const bases = foods.map((f) => foodBase(f, trend, constants));
+  const trendBonuses = foods.map((f) => trendBonus(trend, f, constants));
 
   // 1. 메뉴별 직원 버프 벡터와 상한
   interface MenuEntry {
     idx: number[];
-    baseSum: number;
+    priceSum: number;
+    trendSum: number;
     vecs: Buffs[];
     bound: number;
   }
   const menus: MenuEntry[] = [];
   for (const idx of combinations(foods.length, menuSize)) {
     const menu = idx.map((i) => foods[i]);
-    const baseSum = idx.reduce((s, i) => s + bases[i], 0);
+    const priceSum = idx.reduce((s, i) => s + foods[i].price, 0);
+    const trendSum = idx.reduce((s, i) => s + trendBonuses[i], 0);
     const vecs = owned.map((s) => staffBuffs(s, menu));
-    const bound = revenueOf(baseSum, menuSize, topSums(vecs, 0, slots), constants, popularity);
-    menus.push({ idx, baseSum, vecs, bound });
+    const bound = revenueOf(priceSum, trendSum, menuSize, topSums(vecs, 0, slots), constants, popularity);
+    menus.push({ idx, priceSum, trendSum, vecs, bound });
   }
   menus.sort((a, b) => b.bound - a.bound || compareIdx(a.idx, b.idx));
 
@@ -143,12 +146,12 @@ export function optimize(input: OptimizeInput): OptimizeOutput {
       const r = slots - chosen.length;
       if (r === 0) {
         evaluatedCombos++;
-        const revenue = revenueOf(m.baseSum, menuSize, cur, constants, popularity);
+        const revenue = revenueOf(m.priceSum, m.trendSum, menuSize, cur, constants, popularity);
         if (revenue >= threshold - EPS) found.push({ idx: chosen.slice(), revenue });
         return;
       }
       if (n - i < r) return;
-      const ub = revenueOf(m.baseSum, menuSize, addBuffs(cur, topSums(m.vecs, i, r)), constants, popularity);
+      const ub = revenueOf(m.priceSum, m.trendSum, menuSize, addBuffs(cur, topSums(m.vecs, i, r)), constants, popularity);
       if (ub < threshold - EPS) return;
       chosen.push(i);
       dfs(i + 1, addBuffs(cur, m.vecs[i]));
