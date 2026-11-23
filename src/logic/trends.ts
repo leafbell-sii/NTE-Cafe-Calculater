@@ -1,5 +1,7 @@
 import { TAGS, type Constants, type Food, type GameData, type Trend } from '../types';
 
+export const AVERAGE_TREND_ID = 'average';
+
 export const NONE_TREND: Trend = { id: 'none', label: '없음', kind: 'none', match: { type: 'none' } };
 
 /** SPEC 8.4 트렌드 선택지 생성 */
@@ -23,6 +25,13 @@ export function buildTrends(data: GameData): Trend[] {
       match: { type: 'ingredientAny', ingredients: [ing] },
     });
   }
+  // 범용: 공유 코드가 트렌드 인덱스를 쓰므로 항상 맨 뒤에 둔다.
+  list.push({
+    id: AVERAGE_TREND_ID,
+    label: '전체 트렌드 평균 (범용)',
+    kind: 'average',
+    match: { type: 'average', trends: list.filter((t) => t.kind !== 'none') },
+  });
   return list;
 }
 
@@ -36,7 +45,16 @@ export function trendApplies(trend: Trend, food: Food): boolean {
       return food.tag === m.tag;
     case 'ingredientAny':
       return food.ingredients.some((i) => m.ingredients.includes(i.name));
+    case 'average':
+      return m.trends.some((t) => trendApplies(t, food));
   }
+}
+
+/** 범용 트렌드에서 음식에 적용되는 하위 트렌드 수 (그 외 트렌드는 0/1) */
+export function trendHits(trend: Trend, food: Food): number {
+  const m = trend.match;
+  if (m.type === 'average') return m.trends.filter((t) => trendApplies(t, food)).length;
+  return trendApplies(trend, food) ? 1 : 0;
 }
 
 /** 트렌드 종류별 계수 (태그 트렌드 1.00, 그 외 0.75) */
@@ -46,5 +64,11 @@ export function trendCoef(trend: Trend, constants: Constants): number {
 
 /** 음식에 적용되는 트렌드 계수 (미적용 시 0) */
 export function trendBonus(trend: Trend, food: Food, constants: Constants): number {
+  // 수익은 트렌드 계수 합에 선형이므로, 평균 계수로 계산한 수익 = 전체 트렌드 수익의 평균
+  const m = trend.match;
+  if (m.type === 'average') {
+    if (!m.trends.length) return 0;
+    return m.trends.reduce((s, t) => s + trendBonus(t, food, constants), 0) / m.trends.length;
+  }
   return trendApplies(trend, food) ? trendCoef(trend, constants) : 0;
 }
