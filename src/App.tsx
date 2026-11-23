@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { loadGameData } from './data/load';
 import type { GameData } from './types';
-import { buildTrends, NONE_TREND } from './logic/trends';
+import { AVERAGE_TREND_ID, buildTrends, NONE_TREND } from './logic/trends';
 import { CommonInputs } from './components/CommonInputs';
 import { OptimizeMode } from './components/OptimizeMode';
 import { ManualMode } from './components/ManualMode';
@@ -24,7 +24,7 @@ function Calculator({ data }: { data: GameData }) {
   const trends = useMemo(() => buildTrends(data), [data]);
   const [mode, setMode] = usePersistentState<Mode>('mode', () => 'optimize', oneOf(MODES));
   const [popularity, setPopularity] = usePersistentState('popularity', () => 0, nonNegNumber);
-  const [trendId, setTrendId] = usePersistentState('trendId', () => NONE_TREND.id, (v) =>
+  const [trendId, setTrendId] = usePersistentState('trendId', () => AVERAGE_TREND_ID, (v) =>
     trends.some((t) => t.id === v) ? (v as string) : undefined,
   );
   const trend = trends.find((t) => t.id === trendId) ?? NONE_TREND;
