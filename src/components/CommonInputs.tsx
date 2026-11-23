@@ -11,7 +11,7 @@ interface Props {
 
 const exact = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 6 });
 
-const GROUP_LABEL: Record<Exclude<TrendKind, 'none'>, string> = {
+const GROUP_LABEL: Record<Exclude<TrendKind, 'none' | 'average'>, string> = {
   tag: '태그',
   group: '묶음',
   ingredient: '재료',
@@ -28,7 +28,7 @@ export function CommonInputs({ trends, trendId, onTrend, popularity, onPopularit
     onPopularity(cleaned === '' || cleaned === '.' || !Number.isFinite(v) ? 0 : v);
   };
 
-  const none = trends.filter((t) => t.kind === 'none');
+  const top = trends.filter((t) => t.kind === 'none' || t.kind === 'average');
   const kinds = ['tag', 'group', 'ingredient'] as const;
 
   return (
@@ -49,7 +49,7 @@ export function CommonInputs({ trends, trendId, onTrend, popularity, onPopularit
       <label className="hfield">
         <span className="hfield-label">트렌드</span>
         <select value={trendId} onChange={(e) => onTrend(e.target.value)}>
-          {none.map((t) => (
+          {top.map((t) => (
             <option key={t.id} value={t.id}>
               {t.label}
             </option>

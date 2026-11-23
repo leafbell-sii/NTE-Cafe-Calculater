@@ -70,7 +70,8 @@ describe('트렌드', () => {
   it('선택지: 없음 / 태그 3 / 묶음 / 재료(중복 제거)', () => {
     const list = buildTrends(data);
     const names = new Set(data.foods.flatMap((f) => f.ingredients.map((i) => i.name)));
-    expect(list.length).toBe(1 + 3 + trends.ingredientGroups.length + names.size);
+    expect(list.length).toBe(1 + 3 + trends.ingredientGroups.length + names.size + 1);
+    expect(list[list.length - 1].id).toBe('average');
     expect(list.map((t) => t.id)).toContain('group:fruit');
     expect(list.map((t) => t.id)).toContain('ingredient:사과');
   });
@@ -93,6 +94,21 @@ describe('트렌드', () => {
       constants: data.constants, ingredients: data.ingredients,
     });
     expect(r.foods[0].trend).toBe(1.0);
+  });
+  it('범용(평균) 트렌드 수익 = 전체 트렌드 수익의 평균', () => {
+    const all = buildTrends(data);
+    const avg = trend('average');
+    const subs = all.filter((t) => t.kind !== 'none' && t.kind !== 'average');
+    const menu = ['hot-orange-coffee', 'tiramisu', 'iced-mocha', 'apple-pie', 'ham-cheese-croissant'].map(food);
+    const staff: Staff[] = data.characters.slice(0, 10).map((c) => ({ character: c, level: 5 }));
+    for (const sortBy of ['revenue', 'net'] as const) {
+      const calc = (t: Trend) => {
+        const r = calculate({ menu, staff, trend: t, popularity: 0.02, constants: data.constants, ingredients: data.ingredients });
+        return sortBy === 'net' ? r.net : r.revenue;
+      };
+      const mean = subs.reduce((s, t) => s + calc(t), 0) / subs.length;
+      expect(calc(avg)).toBeCloseTo(mean, 9);
+    }
   });
 });
 
@@ -270,6 +286,11 @@ describe('최적화 = 브루트포스', () => {
   it('순수익 정렬 · 보유 5명 · 전체 음식', () => {
     const owned = ['sakiri', 'baekjang', 'shinku', 'umitsuki', 'mint'].map((id) => ({ character: byId(id), level: 5 }));
     check(owned, NONE_TREND, 0, 25, data.foods, 'net');
+  });
+  it('범용(평균) 트렌드 · 보유 12명 · 매출/순수익', () => {
+    const owned = data.characters.slice(0, 12).map((c, i) => ({ character: c, level: ((i * 2) % 5) + 1 }));
+    check(owned, trend('average'), 0.03, 20, foodsSmall);
+    check(owned, trend('average'), 0.03, 20, foodsSmall, 'net');
   });
   it('보유 0명', () => {
     check([], trend('tag:디저트'), 0, 5, foodsSmall);

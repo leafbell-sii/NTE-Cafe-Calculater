@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { Food, GameData, Staff, Tag, Trend } from '../types';
 import { calculate, type Receipt, type SortBy } from '../logic/calc';
 import { swapLines } from '../logic/optimize';
-import { trendApplies } from '../logic/trends';
+import { trendHits } from '../logic/trends';
 import { fmt2, pct2 } from '../format';
 import { ReceiptView } from './Receipt';
 import { Portrait } from './Portrait';
@@ -116,7 +116,7 @@ export function ResultCard({
               <span className="chip-name">{f.name}</span>
               <span className="chip-sub">
                 {f.tag} · {f.price}
-                {trendApplies(trend, f) && <b className="trend-mark"> ★트렌드</b>}
+                <TrendMark trend={trend} food={f} />
               </span>
             </li>
           ))}
@@ -193,5 +193,17 @@ function RowDiff({ menu, staff, base }: { menu: Food[]; staff: Staff[]; base: No
         </span>
       ))}
     </>
+  );
+}
+
+function TrendMark({ trend, food }: { trend: Trend; food: Food }) {
+  const hits = trendHits(trend, food);
+  if (!hits) return null;
+  if (trend.match.type !== 'average') return <b className="trend-mark"> ★트렌드</b>;
+  const total = trend.match.trends.length;
+  return (
+    <b className="trend-mark" title={`전체 ${total}개 트렌드 중 ${hits}개에서 트렌드 적용`}>
+      {' '}★{hits}/{total}
+    </b>
   );
 }

@@ -66,9 +66,11 @@ export interface Constants {
 export type TrendMatch =
   | { type: 'none' }
   | { type: 'tag'; tag: Tag }
-  | { type: 'ingredientAny'; ingredients: string[] };
+  | { type: 'ingredientAny'; ingredients: string[] }
+  /** 범용: 하위 트렌드 계수의 평균 (SPEC 8.4) */
+  | { type: 'average'; trends: Trend[] };
 
-export type TrendKind = 'none' | 'tag' | 'group' | 'ingredient';
+export type TrendKind = 'none' | 'tag' | 'group' | 'ingredient' | 'average';
 
 export interface Trend {
   id: string;
