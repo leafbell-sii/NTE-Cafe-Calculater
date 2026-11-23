@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData, validateData } from '../data/load';
 import type { GameData, Staff, Trend } from '../types';
-import { calculate, EPS } from './calc';
+import { calculate, EPS, type SortBy } from './calc';
 import { compareIdx, optimize, swapLines } from './optimize';
 import { buildTrends, NONE_TREND } from './trends';
 import foods from '../data/foods.json';
+import ingredients from '../data/ingredients.json';
 import characters from '../data/characters.json';
 import trends from '../data/trends.json';
 import constants from '../data/constants.json';
@@ -28,7 +29,7 @@ describe('데이터 검증', () => {
     badChars[0].effects[0].level = 9;
     badChars[1].skillText.pop();
     const badTrends = { ingredientGroups: [{ id: 'x', label: 'x', ingredients: ['없는재료'] }] };
-    const r = validateData({ foods: badFoods, characters: badChars, trends: badTrends, constants });
+    const r = validateData({ foods: badFoods, ingredients, characters: badChars, trends: badTrends, constants });
     expect(r.ok).toBe(false);
     if (r.ok) return;
     const paths = r.errors.map((e) => `${e.file}:${e.path}`);
@@ -41,20 +42,35 @@ describe('데이터 검증', () => {
     const badFoods = structuredClone(foods) as any[];
     badFoods[1].id = badFoods[0].id;
     const badTrends = { ingredientGroups: [{ id: 'x', label: 'x', ingredients: ['없는재료'] }] };
-    const r = validateData({ foods: badFoods, characters, trends: badTrends, constants });
+    const r = validateData({ foods: badFoods, ingredients, characters, trends: badTrends, constants });
     expect(r.ok).toBe(false);
     if (r.ok) return;
     const paths = r.errors.map((e) => `${e.file}:${e.path}`);
     expect(paths).toContain('foods.json:[1].id');
     expect(paths).toContain('trends.json:ingredientGroups[0].ingredients[0]');
   });
+  it('식재료 참조·개수·중복', () => {
+    const badFoods = structuredClone(foods) as any[];
+    badFoods[0].ingredients[0].name = '없는재료';
+    badFoods[1].ingredients[1].count = 0;
+    const badIngs = [...structuredClone(ingredients), { name: '밀가루', price: 1 }];
+    const r = validateData({ foods: badFoods, ingredients: badIngs, characters, trends, constants });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    const paths = r.errors.map((e) => `${e.file}:${e.path}`);
+    expect(paths).toContain('foods.json:[1].ingredients[1].count');
+    expect(paths).toContain(`ingredients.json:[${ingredients.length}].name`);
+    const r2 = validateData({ foods: (() => { const f = structuredClone(foods) as any[]; f[0].ingredients[0].name = '없는재료'; return f; })(), ingredients, characters, trends, constants });
+    expect(r2.ok).toBe(false);
+    if (!r2.ok) expect(r2.errors.map((e) => `${e.file}:${e.path}`)).toContain('foods.json:[0].ingredients[0].name');
+  });
 });
 
 describe('트렌드', () => {
   it('선택지: 없음 / 태그 3 / 묶음 / 재료(중복 제거)', () => {
     const list = buildTrends(data);
-    const ingredients = new Set(data.foods.flatMap((f) => f.ingredients));
-    expect(list.length).toBe(1 + 3 + trends.ingredientGroups.length + ingredients.size);
+    const names = new Set(data.foods.flatMap((f) => f.ingredients.map((i) => i.name)));
+    expect(list.length).toBe(1 + 3 + trends.ingredientGroups.length + names.size);
     expect(list.map((t) => t.id)).toContain('group:fruit');
     expect(list.map((t) => t.id)).toContain('ingredient:사과');
   });
@@ -64,7 +80,7 @@ describe('트렌드', () => {
       staff: [],
       trend: trend('group:fruit'),
       popularity: 0,
-      constants: data.constants,
+      constants: data.constants, ingredients: data.ingredients,
     });
     expect(r.foods[0].trend).toBe(0.75);
   });
@@ -74,7 +90,7 @@ describe('트렌드', () => {
       staff: [],
       trend: trend('tag:음료'),
       popularity: 0,
-      constants: data.constants,
+      constants: data.constants, ingredients: data.ingredients,
     });
     expect(r.foods[0].trend).toBe(1.0);
   });
@@ -89,7 +105,7 @@ describe('계산', () => {
       { character: byId('baekjang'), level: 1 },
       { character: byId('umitsuki'), level: 5 },
     ];
-    const r = calculate({ menu, staff, trend: trend('tag:음료'), popularity: 0.015, constants: data.constants });
+    const r = calculate({ menu, staff, trend: trend('tag:음료'), popularity: 0.015, constants: data.constants, ingredients: data.ingredients });
     const A = 0.12 + 0.18 + 0.12;
     const foodCoef = 10.6 + 1.0 + A + (12.2 + 1.0 + A);
     const traffic = (2400 + 18) * (1 + 0.025);
@@ -102,7 +118,7 @@ describe('계산', () => {
       staff: [{ character: byId('shinku'), level: 3 }],
       trend: NONE_TREND,
       popularity: 0,
-      constants: data.constants,
+      constants: data.constants, ingredients: data.ingredients,
     });
     expect(r.buffs.priceAdd).toBeCloseTo(0.6, 12);
   });
@@ -112,7 +128,7 @@ describe('계산', () => {
     const staff: Staff[] = ['sakiri', 'baekjang', 'daffodil', 'edgar', 'shinku', 'rinko', 'akane-rin', 'umitsuki', 'haniel', 'iroi'].map(
       (id) => ({ character: byId(id), level: 5 }),
     );
-    const r = calculate({ menu, staff, trend: trend('ingredient:커피 원두'), popularity: 0, constants: data.constants });
+    const r = calculate({ menu, staff, trend: trend('ingredient:커피 원두'), popularity: 0, constants: data.constants, ingredients: data.ingredients });
     const tira = r.foods.find((f) => f.food.id === 'tiramisu')!;
     expect(tira.coef).toBeCloseTo((17 + 1.56) * 1.03 + 0.75, 10);
     expect(tira.coef.toFixed(2)).toBe('19.87');
@@ -123,9 +139,32 @@ describe('계산', () => {
       staff: [{ character: byId('lacrimosa'), level: 5 }],
       trend: NONE_TREND,
       popularity: 0,
-      constants: data.constants,
+      constants: data.constants, ingredients: data.ingredients,
     });
-    expect(r.effects.map((e) => e.met)).toEqual([true, false]);
+    expect(r.effects.filter((e) => e.effect.kind !== 'ingredientReduce').map((e) => e.met)).toEqual([true, false]);
+  });
+  it('식재료 소모량과 비용', () => {
+    // 애플파이(밀가루 2, 사과 2) + 티라미수(밀가루 3, 푸카 쿠키 2, 치즈 덩이 1, 커피 원두 1)
+    // 사키리 Lv5(감소 2%) + 우미츠키 Lv5(감소 1%), 백장 Lv1(+18P)
+    const r = calculate({
+      menu: [food('apple-pie'), food('tiramisu')],
+      staff: [
+        { character: byId('sakiri'), level: 5 },
+        { character: byId('umitsuki'), level: 5 },
+        { character: byId('baekjang'), level: 1 },
+      ],
+      trend: NONE_TREND,
+      popularity: 0.1,
+      constants: data.constants, ingredients: data.ingredients,
+    });
+    expect(r.reduce).toBeCloseTo(0.03, 12);
+    const t = 2418 / 10000;
+    const flour = r.ingredients.find((l) => l.name === '밀가루')!;
+    expect(flour.uses).toBe(5);
+    expect(flour.perHour).toBeCloseTo(t * 5 * 0.97, 12);
+    const costSum = 5 * 24 + 2 * 28 + 2 * 72 + 1 * 44 + 1 * 24;
+    expect(r.ingredientCost).toBeCloseTo(t * 0.97 * costSum, 10);
+    expect(r.net).toBeCloseTo(r.revenue - r.ingredientCost, 10);
   });
 });
 
@@ -151,7 +190,7 @@ interface BruteGroup {
   combos: number[][];
 }
 
-function brute(owned: Staff[], t: Trend, popularity: number, foodsSubset = data.foods): BruteGroup[] {
+function brute(owned: Staff[], t: Trend, popularity: number, foodsSubset = data.foods, sortBy: SortBy = 'revenue'): BruteGroup[] {
   const fi = foodsSubset.map((_, i) => i);
   const si = owned.map((_, i) => i);
   const menuSize = Math.min(5, foodsSubset.length);
@@ -161,8 +200,10 @@ function brute(owned: Staff[], t: Trend, popularity: number, foodsSubset = data.
     const menu = m.map((i) => foodsSubset[i]);
     const rows = [...combos(si, slots)].map((c) => ({
       c,
-      revenue: calculate({ menu, staff: c.map((i) => owned[i]), trend: t, popularity, constants: data.constants })
-        .revenue,
+      revenue: (() => {
+        const r = calculate({ menu, staff: c.map((i) => owned[i]), trend: t, popularity, constants: data.constants, ingredients: data.ingredients });
+        return sortBy === 'net' ? r.net : r.revenue;
+      })(),
     }));
     rows.sort((a, b) => b.revenue - a.revenue);
     let s = 0;
@@ -180,14 +221,14 @@ function brute(owned: Staff[], t: Trend, popularity: number, foodsSubset = data.
   return groups;
 }
 
-function check(owned: Staff[], t: Trend, popularity: number, k: number, foodsSubset = data.foods) {
-  const expected = brute(owned, t, popularity, foodsSubset);
-  const { groups } = optimize({ foods: foodsSubset, owned, trend: t, popularity, constants: data.constants, k });
+function check(owned: Staff[], t: Trend, popularity: number, k: number, foodsSubset = data.foods, sortBy: SortBy = 'revenue') {
+  const expected = brute(owned, t, popularity, foodsSubset, sortBy);
+  const { groups } = optimize({ foods: foodsSubset, owned, trend: t, popularity, constants: data.constants, ingredients: data.ingredients, k, sortBy });
   expect(groups.length).toBeGreaterThanOrEqual(Math.min(k, expected.length));
   // 반환된 결과는 브루트포스 상위와 일치 (동점 포함)
   groups.forEach((g, i) => {
     const e = expected[i];
-    expect(g.revenue).toBeCloseTo(e.revenue, 8);
+    expect(g.score).toBeCloseTo(e.revenue, 8);
     expect(g.menuIdx).toEqual(e.menuIdx);
     const ownedIdx = (s: Staff) => owned.indexOf(s);
     expect(g.staff.map(ownedIdx)).toEqual(e.combos[0]);
@@ -222,6 +263,14 @@ describe('최적화 = 브루트포스', () => {
     }));
     check(owned, trend('group:fruit'), 0.1, 25);
   });
+  it('순수익 정렬 · 보유 12명 (10명 선택, 레벨 섞음)', () => {
+    const owned = data.characters.slice(0, 12).map((c, i) => ({ character: c, level: ((i * 3) % 5) + 1 }));
+    check(owned, trend('tag:디저트'), 0.05, 20, foodsSmall, 'net');
+  });
+  it('순수익 정렬 · 보유 5명 · 전체 음식', () => {
+    const owned = ['sakiri', 'baekjang', 'shinku', 'umitsuki', 'mint'].map((id) => ({ character: byId(id), level: 5 }));
+    check(owned, NONE_TREND, 0, 25, data.foods, 'net');
+  });
   it('보유 0명', () => {
     check([], trend('tag:디저트'), 0, 5, foodsSmall);
   });
@@ -232,12 +281,12 @@ describe('최적화 = 브루트포스', () => {
       owned,
       trend: NONE_TREND,
       popularity: 0,
-      constants: data.constants,
+      constants: data.constants, ingredients: data.ingredients,
       k: 30,
     });
     groups.forEach((g, i) => {
       if (i === 0) expect(g.rank).toBe(1);
-      else if (Math.abs(groups[i - 1].revenue - g.revenue) < EPS) expect(g.rank).toBe(groups[i - 1].rank);
+      else if (Math.abs(groups[i - 1].score - g.score) < EPS) expect(g.rank).toBe(groups[i - 1].rank);
       else expect(g.rank).toBe(i + 1);
     });
   });

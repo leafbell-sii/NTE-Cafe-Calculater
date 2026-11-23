@@ -5,6 +5,8 @@
     "skillName": "근면의 대가",
     "effects": [
       { "level": 1, "kind": "priceAdd", "value": 0.12 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "priceAdd", "value": 0.3, "condition": { "type": "sameTagCount", "min": 3 } }
     ],
     "skillText": [
@@ -21,6 +23,8 @@
     "skillName": "토마토 셰프",
     "effects": [
       { "level": 1, "kind": "priceMul", "value": 0.01, "condition": { "type": "tagCount", "tag": "디저트", "min": 1 } },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "priceMul", "value": 0.015, "condition": { "type": "tagCount", "tag": "디저트", "min": 2 } }
     ],
     "skillText": [
@@ -37,6 +41,8 @@
     "skillName": "패밀리 비즈니스",
     "effects": [
       { "level": 1, "kind": "priceAdd", "value": 0.2, "condition": { "type": "tagCount", "tag": "메인 메뉴", "min": 1 } },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "priceAdd", "value": 0.3, "condition": { "type": "tagCount", "tag": "메인 메뉴", "min": 2 } }
     ],
     "skillText": [
@@ -53,6 +59,8 @@
     "skillName": "민트 토네이도",
     "effects": [
       { "level": 1, "kind": "priceAdd", "value": 0.12 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "priceAdd", "value": 0.18 }
     ],
     "skillText": [
@@ -69,6 +77,8 @@
     "skillName": "승승장구",
     "effects": [
       { "level": 1, "kind": "trafficAdd", "value": 18 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "trafficAdd", "value": 27 }
     ],
     "skillText": [
@@ -85,6 +95,8 @@
     "skillName": "환대의 기술",
     "effects": [
       { "level": 1, "kind": "trafficAdd", "value": 18 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "trafficAdd", "value": 27 }
     ],
     "skillText": [
@@ -101,6 +113,8 @@
     "skillName": "중간 관리자",
     "effects": [
       { "level": 1, "kind": "trafficAdd", "value": 18 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "trafficAdd", "value": 27 }
     ],
     "skillText": [
@@ -117,7 +131,9 @@
     "skillName": "지식의 발현",
     "effects": [
       { "level": 1, "kind": "trafficAdd", "value": 18 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 3, "kind": "trafficAdd", "value": 18 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "trafficAdd", "value": 27 }
     ],
     "skillText": [
@@ -134,7 +150,9 @@
     "skillName": "가끔씩 월급루팡",
     "effects": [
       { "level": 1, "kind": "priceAdd", "value": 0.3, "condition": { "type": "tagCount", "tag": "음료", "min": 3 } },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 3, "kind": "priceAdd", "value": 0.3, "condition": { "type": "tagCount", "tag": "음료", "min": 3 } },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "priceMul", "value": 0.03, "condition": { "type": "tagCount", "tag": "음료", "min": 3 } }
     ],
     "skillText": [
@@ -151,7 +169,9 @@
     "skillName": "주방의 마법",
     "effects": [
       { "level": 1, "kind": "trafficAdd", "value": 18 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 3, "kind": "trafficAdd", "value": 18 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "trafficAdd", "value": 27 }
     ],
     "skillText": [
@@ -168,7 +188,9 @@
     "skillName": "바텐더 스페셜",
     "effects": [
       { "level": 1, "kind": "trafficAdd", "value": 18 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 3, "kind": "trafficAdd", "value": 18 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "trafficAdd", "value": 27 }
     ],
     "skillText": [
@@ -186,6 +208,7 @@
     "effects": [
       { "level": 1, "kind": "priceAdd", "value": 0.12 },
       { "level": 2, "kind": "trafficMul", "value": 0.01, "condition": { "type": "tagCount", "tag": "음료", "min": 2 } },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "trafficMul", "value": 0.015, "condition": { "type": "tagCount", "tag": "음료", "min": 2 } }
     ],
     "skillText": [
@@ -202,7 +225,9 @@
     "skillName": "알바 마스터",
     "effects": [
       { "level": 1, "kind": "priceAdd", "value": 0.12 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 3, "kind": "priceAdd", "value": 0.12 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "priceAdd", "value": 0.18 }
     ],
     "skillText": [
@@ -219,6 +244,8 @@
     "skillName": "커피 마스터",
     "effects": [
       { "level": 1, "kind": "priceAdd", "value": 0.12 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "priceAdd", "value": 0.18 }
     ],
     "skillText": [
@@ -235,6 +262,8 @@
     "skillName": "홀 매니저",
     "effects": [
       { "level": 1, "kind": "trafficAdd", "value": 18 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "trafficAdd", "value": 27 }
     ],
     "skillText": [
@@ -251,7 +280,9 @@
     "skillName": "어서 오세요!",
     "effects": [
       { "level": 1, "kind": "trafficAdd", "value": 18 },
+      { "level": 2, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 3, "kind": "trafficAdd", "value": 18 },
+      { "level": 4, "kind": "ingredientReduce", "value": 0.01 },
       { "level": 5, "kind": "trafficAdd", "value": 27 }
     ],
     "skillText": [

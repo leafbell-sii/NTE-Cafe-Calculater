@@ -7,6 +7,7 @@ import type { GameData } from './types';
 // 받은 쪽은 앱 시작 전에 localStorage에 덮어쓰고, 값 검증은 평소 복원 경로(sanitize)가 맡는다.
 //
 // #c=  압축 형식 (기본). id 문자열 대신 데이터 JSON의 순서(인덱스)를 바이트로 담는다.
+//      플래그: 1 수동 모드, 2 수동 데이터 있음, 4 순수익 정렬
 //      [버전][플래그][트렌드][캐릭터별 보유·레벨 4비트…][수동 모드(있을 때만)][인기도 문자열]
 //      ※ 데이터 JSON의 항목 순서가 바뀌면 그 전에 만든 링크는 다른 설정으로 열릴 수 있다.
 // #s=  구 형식 (localStorage JSON 전체). 읽기만 지원.
@@ -15,6 +16,7 @@ const LEGACY = 's';
 const VERSION = 1;
 const FLAG_MANUAL_MODE = 1;
 const FLAG_MANUAL_DATA = 2;
+const FLAG_SORT_NET = 4;
 
 // ---- base64url ----
 
@@ -73,7 +75,9 @@ export function encodeCompact(s: Stored, data: GameData): string | undefined {
 
   const bytes = [
     VERSION,
-    (s.mode === 'manual' ? FLAG_MANUAL_MODE : 0) | (hasManual ? FLAG_MANUAL_DATA : 0),
+    (s.mode === 'manual' ? FLAG_MANUAL_MODE : 0) |
+      (hasManual ? FLAG_MANUAL_DATA : 0) |
+      (s['optimize.sortBy'] === 'net' ? FLAG_SORT_NET : 0),
     Math.max(0, trends.findIndex((t) => t.id === s.trendId)),
     ...nibbles(characters.map((c) => (owned[c.id] === false ? 0 : 8) | level(levels[c.id]))),
   ];
@@ -106,6 +110,7 @@ export function decodeCompact(code: string, data: GameData): Stored | undefined 
   const out: Stored = {
     mode: flags & FLAG_MANUAL_MODE ? 'manual' : 'optimize',
     trendId: trends[trendIdx]?.id,
+    'optimize.sortBy': flags & FLAG_SORT_NET ? 'net' : 'revenue',
     'optimize.owned': Object.fromEntries(characters.map((c, i) => [c.id, (charNib[i] & 8) !== 0])),
     'optimize.levels': Object.fromEntries(characters.map((c, i) => [c.id, charNib[i] & 7])),
     'manual.foodIds': Array(maxFoods).fill(''),

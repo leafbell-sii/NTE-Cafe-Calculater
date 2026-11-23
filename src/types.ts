@@ -2,15 +2,27 @@
 export const TAGS = ['메인 메뉴', '디저트', '음료'] as const;
 export type Tag = (typeof TAGS)[number];
 
+/** 음식 1개에 들어가는 재료와 소모 개수 */
+export interface FoodIngredient {
+  name: string;
+  count: number;
+}
+
 export interface Food {
   id: string;
   name: string;
   price: number;
   tag: Tag;
-  ingredients: string[];
+  ingredients: FoodIngredient[];
 }
 
-export const EFFECT_KINDS = ['priceAdd', 'priceMul', 'trafficAdd', 'trafficMul'] as const;
+/** ingredients.json: 식재료와 개당 가격(폰즈) */
+export interface Ingredient {
+  name: string;
+  price: number;
+}
+
+export const EFFECT_KINDS = ['priceAdd', 'priceMul', 'trafficAdd', 'trafficMul', 'ingredientReduce'] as const;
 export type EffectKind = (typeof EFFECT_KINDS)[number];
 
 export type Condition =
@@ -67,6 +79,7 @@ export interface Trend {
 
 export interface GameData {
   foods: Food[];
+  ingredients: Ingredient[];
   characters: Character[];
   trends: TrendsData;
   constants: Constants;

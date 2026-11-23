@@ -3,6 +3,8 @@ import { conditionLabel, type EffectLine, type Receipt } from '../logic/calc';
 import { fmt, fmt2, pct } from '../format';
 
 const isTraffic = (k: EffectKind) => k === 'trafficAdd' || k === 'trafficMul';
+const isPrice = (k: EffectKind) => k === 'priceAdd' || k === 'priceMul';
+const coef = (n: number) => n.toLocaleString('ko-KR', { maximumFractionDigits: 6 });
 
 function effectValue(e: EffectLine) {
   const { kind, value } = e.effect;
@@ -11,6 +13,8 @@ function effectValue(e: EffectLine) {
       return `+${fmt(value)}폰즈`;
     case 'trafficAdd':
       return `+${fmt(value)}P`;
+    case 'ingredientReduce':
+      return `−${pct(value)}`;
     default:
       return `+${pct(value)}`;
   }
@@ -40,7 +44,8 @@ function EffectRows({ lines }: { lines: EffectLine[] }) {
 
 export function ReceiptView({ receipt: r }: { receipt: Receipt }) {
   const traffic = r.effects.filter((e) => isTraffic(e.effect.kind));
-  const price = r.effects.filter((e) => !isTraffic(e.effect.kind));
+  const price = r.effects.filter((e) => isPrice(e.effect.kind));
+  const reduce = r.effects.filter((e) => e.effect.kind === 'ingredientReduce');
   const byKind = (lines: EffectLine[], k: EffectKind) => lines.filter((e) => e.effect.kind === k);
 
   return (
@@ -115,10 +120,47 @@ export function ReceiptView({ receipt: r }: { receipt: Receipt }) {
       </section>
 
       <section className="r-final">
-        <h4>6. 최종 수익</h4>
+        <h4>6. 최종 수익 (매출)</h4>
         <p>
           {fmt2(r.totalFoodCoef)} × {fmt2(r.trafficCoef)} ×{' '}
           {r.popularityCoef.toLocaleString('ko-KR', { maximumFractionDigits: 6 })} = <b>{fmt2(r.revenue)}</b> 폰즈
+        </p>
+      </section>
+
+      <section>
+        <h4>7. 식재료 소모</h4>
+        <ul>
+          <li className="r-sub">소모 감소</li>
+          <EffectRows lines={reduce} />
+          <li className="r-row total">
+            <span>소모 배율 (1 − {pct(r.reduce)})</span>
+            <span className="r-val">{coef(r.reduceCoef)}</span>
+          </li>
+          <li className="r-sub">
+            시간당 소모량 = {fmt2(r.traffic)}P ÷ 10000 × 사용 개수 × {coef(r.reduceCoef)}
+          </li>
+          {r.ingredients.length === 0 && <li className="r-row muted">메뉴 없음</li>}
+          {r.ingredients.map((l) => (
+            <li key={l.name} className="r-row">
+              <span>
+                {l.name} <span className="cond">×{l.uses}</span>
+              </span>
+              <span className="r-val">
+                {fmt2(l.perHour)}개 × {fmt(l.price)} = {fmt2(l.cost)}
+              </span>
+            </li>
+          ))}
+          <li className="r-row total">
+            <span>시간당 식재료 비용</span>
+            <span className="r-val">{fmt2(r.ingredientCost)}폰즈</span>
+          </li>
+        </ul>
+      </section>
+
+      <section className="r-final">
+        <h4>8. 순수익</h4>
+        <p>
+          {fmt2(r.revenue)} − {fmt2(r.ingredientCost)} = <b>{fmt2(r.net)}</b> 폰즈
         </p>
       </section>
     </div>

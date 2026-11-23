@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import foodsJson from './foods.json';
+import ingredientsJson from './ingredients.json';
 import charactersJson from './characters.json';
 import trendsJson from './trends.json';
 import constantsJson from './constants.json';
@@ -13,7 +14,12 @@ const foodSchema = z.object({
   name: z.string().min(1),
   price: nonNeg,
   tag: tagSchema,
-  ingredients: z.array(z.string().min(1)),
+  ingredients: z.array(z.object({ name: z.string().min(1), count: z.number().int().min(1, '1 이상이어야 합니다') })),
+});
+
+const ingredientSchema = z.object({
+  name: z.string().min(1),
+  price: nonNeg,
 });
 
 const conditionSchema = z.discriminatedUnion('type', [
@@ -92,17 +98,28 @@ function checkUnique(file: string, items: { id: string }[], prefix: string, erro
 /** SPEC 8.5 데이터 검증. 원본 JSON을 인자로 받아 테스트에서도 쓸 수 있게 한다. */
 export function validateData(raw: {
   foods: unknown;
+  ingredients: unknown;
   characters: unknown;
   trends: unknown;
   constants: unknown;
 }): LoadResult {
   const errors: DataError[] = [];
   const foods = parse('foods.json', z.array(foodSchema), raw.foods, errors);
+  const ingredients = parse('ingredients.json', z.array(ingredientSchema), raw.ingredients, errors);
   const characters = parse('characters.json', z.array(characterSchema), raw.characters, errors);
   const trends = parse('trends.json', trendsSchema, raw.trends, errors);
   const constants = parse('constants.json', constantsSchema, raw.constants, errors);
 
   if (foods) checkUnique('foods.json', foods, '', errors);
+  if (ingredients) {
+    const seen = new Map<string, number>();
+    ingredients.forEach((ing, i) => {
+      const prev = seen.get(ing.name);
+      if (prev !== undefined) {
+        errors.push({ file: 'ingredients.json', path: `[${i}].name`, message: `재료 "${ing.name}"가 [${prev}]와 중복됩니다` });
+      } else seen.set(ing.name, i);
+    });
+  }
   if (characters) checkUnique('characters.json', characters, '', errors);
   if (trends) checkUnique('trends.json', trends.ingredientGroups, 'ingredientGroups', errors);
 
@@ -128,8 +145,32 @@ export function validateData(raw: {
     });
   }
 
+  if (foods && ingredients) {
+    const known = new Set(ingredients.map((i) => i.name));
+    foods.forEach((f, fi) => {
+      const seen = new Set<string>();
+      f.ingredients.forEach((ing, ii) => {
+        if (!known.has(ing.name)) {
+          errors.push({
+            file: 'foods.json',
+            path: `[${fi}].ingredients[${ii}].name`,
+            message: `재료 "${ing.name}"가 ingredients.json에 없습니다 (${f.name})`,
+          });
+        }
+        if (seen.has(ing.name)) {
+          errors.push({
+            file: 'foods.json',
+            path: `[${fi}].ingredients[${ii}].name`,
+            message: `재료 "${ing.name}"가 중복됩니다 (${f.name})`,
+          });
+        }
+        seen.add(ing.name);
+      });
+    });
+  }
+
   if (foods && trends) {
-    const all = new Set(foods.flatMap((f) => f.ingredients));
+    const all = new Set(foods.flatMap((f) => f.ingredients.map((i) => i.name)));
     trends.ingredientGroups.forEach((g, gi) => {
       g.ingredients.forEach((ing, ii) => {
         if (!all.has(ing)) {
@@ -143,13 +184,14 @@ export function validateData(raw: {
     });
   }
 
-  if (errors.length || !foods || !characters || !trends || !constants) return { ok: false, errors };
-  return { ok: true, data: { foods, characters, trends, constants } };
+  if (errors.length || !foods || !ingredients || !characters || !trends || !constants) return { ok: false, errors };
+  return { ok: true, data: { foods, ingredients, characters, trends, constants } };
 }
 
 export function loadGameData(): LoadResult {
   return validateData({
     foods: foodsJson,
+    ingredients: ingredientsJson,
     characters: charactersJson,
     trends: trendsJson,
     constants: constantsJson,
