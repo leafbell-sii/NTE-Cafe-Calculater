@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import type { GameData, Staff, Trend } from '../types';
 import { optimize } from '../logic/optimize';
+import { SORT_BYS, type SortBy } from '../logic/calc';
 import { ResultCard } from './ResultCard';
 import { LevelSelect } from './LevelSelect';
 import { Portrait } from './Portrait';
-import { idMap, isLevel, usePersistentState } from '../persist';
+import { idMap, isLevel, oneOf, usePersistentState } from '../persist';
 
 interface Props {
   data: GameData;
@@ -28,6 +29,7 @@ export function OptimizeMode({ data, trend, popularity }: Props) {
     () => Object.fromEntries(ids.map((id) => [id, max])),
     idMap(ids, isLevel(max), max),
   );
+  const [sortBy, setSortBy] = usePersistentState<SortBy>('optimize.sortBy', () => 'revenue', oneOf(SORT_BYS));
   const [shown, setShown] = useState(INITIAL);
 
   const staff: Staff[] = useMemo(
@@ -36,7 +38,7 @@ export function OptimizeMode({ data, trend, popularity }: Props) {
   );
 
   // 입력이 바뀌면 처음 5개로 되돌림
-  const inputKey = `${trend.id}|${popularity}|${staff.map((s) => `${s.character.id}:${s.level}`).join(',')}`;
+  const inputKey = `${sortBy}|${trend.id}|${popularity}|${staff.map((s) => `${s.character.id}:${s.level}`).join(',')}`;
   const [lastKey, setLastKey] = useState(inputKey);
   if (lastKey !== inputKey) {
     setLastKey(inputKey);
@@ -46,8 +48,18 @@ export function OptimizeMode({ data, trend, popularity }: Props) {
   // 표시 개수 + 다음 「더 보기」 분량 (SPEC 6.2)
   const k = shown + STEP;
   const { groups, stats } = useMemo(
-    () => optimize({ foods: data.foods, owned: staff, trend, popularity, constants: data.constants, k }),
-    [data, staff, trend, popularity, k],
+    () =>
+      optimize({
+        foods: data.foods,
+        ingredients: data.ingredients,
+        sortBy,
+        owned: staff,
+        trend,
+        popularity,
+        constants: data.constants,
+        k,
+      }),
+    [data, sortBy, staff, trend, popularity, k],
   );
   const visible = groups.slice(0, shown);
   const ownedCount = staff.length;
@@ -107,6 +119,14 @@ export function OptimizeMode({ data, trend, popularity }: Props) {
       <section className="results" aria-live="polite">
         <div className="results-head">
           <h2>추천 조합</h2>
+          <div className="mode-toggle sort-toggle" role="group" aria-label="정렬 기준">
+            <button aria-pressed={sortBy === 'revenue'} onClick={() => setSortBy('revenue')}>
+              매출순
+            </button>
+            <button aria-pressed={sortBy === 'net'} onClick={() => setSortBy('net')} title="매출 − 식재료 비용">
+              순수익순
+            </button>
+          </div>
           <span className="meta">
             {ownedCount > data.constants.maxStaff
               ? `${ownedCount}명 중 ${data.constants.maxStaff}명 선택`
@@ -120,10 +140,11 @@ export function OptimizeMode({ data, trend, popularity }: Props) {
           <ol className="result-list">
             {visible.map((g, i) => (
               <ResultCard
-                key={`${g.menuIdx.join('-')}|${g.revenue}`}
+                key={`${sortBy}|${g.menuIdx.join('-')}|${g.score}`}
                 data={data}
                 trend={trend}
                 popularity={popularity}
+                sortBy={sortBy}
                 rank={g.rank}
                 menu={g.menu}
                 staff={g.staff}

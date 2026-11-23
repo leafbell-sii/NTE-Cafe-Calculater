@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Food, GameData, Staff, Tag, Trend } from '../types';
-import { calculate } from '../logic/calc';
+import { calculate, type Receipt, type SortBy } from '../logic/calc';
 import { swapLines } from '../logic/optimize';
 import { trendApplies } from '../logic/trends';
 import { fmt2, pct2 } from '../format';
@@ -11,6 +11,8 @@ interface Props {
   data: GameData;
   trend: Trend;
   popularity: number;
+  /** 최적화 정렬 기준. 순위 비율·차이도 이 값 기준 (수동 모드는 매출) */
+  sortBy?: SortBy;
   menu: Food[];
   staff: Staff[];
   rank?: number;
@@ -19,7 +21,7 @@ interface Props {
   /** 처음엔 한 줄 요약으로 접어 둠 */
   collapsible?: boolean;
   /** 접힌 행에서 차이를 보여줄 기준(1위) 조합 */
-  base?: { menu: Food[]; staff: Staff[]; revenue: number };
+  base?: { menu: Food[]; staff: Staff[]; score: number };
 }
 
 const diff = <T,>(a: T[], b: T[], key: (x: T) => string) => {
@@ -31,11 +33,27 @@ const TAG_CLASS: Record<Tag, string> = { '메인 메뉴': 'tag-main', 디저트:
 
 export const staffLabel = (s: Staff) => `${s.character.name} Lv${s.level}`;
 
-export function ResultCard({ data, trend, popularity, menu, staff, rank, alternatives = [], featured, collapsible, base }: Props) {
+const SORT_LABEL: Record<SortBy, string> = { revenue: '매출', net: '순수익' };
+const scoreOf = (r: Receipt, sortBy: SortBy) => (sortBy === 'net' ? r.net : r.revenue);
+
+export function ResultCard({
+  data,
+  trend,
+  popularity,
+  sortBy = 'revenue',
+  menu,
+  staff,
+  rank,
+  alternatives = [],
+  featured,
+  collapsible,
+  base,
+}: Props) {
   const receipt = useMemo(
-    () => calculate({ menu, staff, trend, popularity, constants: data.constants }),
+    () => calculate({ menu, ingredients: data.ingredients, staff, trend, popularity, constants: data.constants }),
     [menu, staff, trend, popularity, data],
   );
+  const score = scoreOf(receipt, sortBy);
   const [showAlt, setShowAlt] = useState(false);
   const [open, setOpen] = useState(!collapsible);
   const order = useMemo(() => new Map(data.characters.map((c, i) => [c.id, i])), [data]);
@@ -46,16 +64,16 @@ export function ResultCard({ data, trend, popularity, menu, staff, rank, alterna
 
   const Tag = rank === undefined ? 'div' : 'li';
   // 1위 수익을 100%로 본 비율 (최적화 결과에만)
-  const share = rank === undefined ? undefined : base ? (base.revenue > 0 ? receipt.revenue / base.revenue : 1) : 1;
+  const share = rank === undefined ? undefined : base ? (base.score > 0 ? score / base.score : 1) : 1;
 
   if (!open) {
     return (
       <Tag className="card row">
         <button className="row-btn" aria-expanded={false} onClick={() => setOpen(true)}>
           {rank !== undefined && <span className="rank">{rank}위</span>}
-          <span className="revenue-num">{fmt2(receipt.revenue)}</span>
+          <span className="revenue-num">{fmt2(score)}</span>
           {share !== undefined && <span className="share">{pct2(share)}</span>}
-          {base && <span className="row-delta">−{fmt2(base.revenue - receipt.revenue)}</span>}
+          {base && <span className="row-delta">−{fmt2(base.score - score)}</span>}
           <span className="row-menu">{base ? <RowDiff menu={menu} staff={staff} base={base} /> : menu.map((f) => f.name).join(' · ')}</span>
           <span className="chev" aria-hidden>
             ▸
@@ -70,8 +88,8 @@ export function ResultCard({ data, trend, popularity, menu, staff, rank, alterna
       <div className="card-top">
         {rank !== undefined && <span className="rank">{rank}위</span>}
         <div className="revenue">
-          <span className="revenue-num">{fmt2(receipt.revenue)}</span>
-          <span className="revenue-unit">폰즈/시간</span>
+          <span className="revenue-num">{fmt2(score)}</span>
+          <span className="revenue-unit">폰즈/시간 {SORT_LABEL[sortBy]}</span>
           {share !== undefined && <span className="share">{pct2(share)}</span>}
         </div>
         {collapsible && (
@@ -80,6 +98,14 @@ export function ResultCard({ data, trend, popularity, menu, staff, rank, alterna
           </button>
         )}
       </div>
+
+      <p className="money-line">
+        <span>매출 {fmt2(receipt.revenue)}</span>
+        <span>식재료 −{fmt2(receipt.ingredientCost)}</span>
+        <span>
+          순수익 <b>{fmt2(receipt.net)}</b>
+        </span>
+      </p>
 
       <div className="card-section">
         <h3>메뉴</h3>

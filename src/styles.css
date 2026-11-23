@@ -940,3 +940,20 @@ input:focus-visible {
     display: none;
   }
 }
+
+/* 매출 · 식재료 · 순수익 요약 */
+.money-line {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: var(--text-2);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.money-line b {
+  color: var(--text);
+}
+.sort-toggle {
+  margin-left: 0;
+}

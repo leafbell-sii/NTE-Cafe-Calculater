@@ -14,7 +14,7 @@ export function buildTrends(data: GameData): Trend[] {
       match: { type: 'ingredientAny', ingredients: g.ingredients },
     });
   }
-  const ingredients = [...new Set(data.foods.flatMap((f) => f.ingredients))].sort((a, b) => a.localeCompare(b, 'ko'));
+  const ingredients = [...new Set(data.foods.flatMap((f) => f.ingredients.map((i) => i.name)))].sort((a, b) => a.localeCompare(b, 'ko'));
   for (const ing of ingredients) {
     list.push({
       id: `ingredient:${ing}`,
@@ -35,7 +35,7 @@ export function trendApplies(trend: Trend, food: Food): boolean {
     case 'tag':
       return food.tag === m.tag;
     case 'ingredientAny':
-      return food.ingredients.some((i) => m.ingredients.includes(i));
+      return food.ingredients.some((i) => m.ingredients.includes(i.name));
   }
 }
 
