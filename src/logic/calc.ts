@@ -1,5 +1,5 @@
 import type { Condition, Constants, EffectKind, Food, Ingredient, SkillEffect, Staff, Trend } from '../types';
-import { trendBonus } from './trends';
+import { trendBonus, type TrendBonus } from './trends';
 
 /** 부동소수 비교 오차 (SPEC 6.1) */
 export const EPS = 1e-9;
@@ -64,27 +64,28 @@ export function staffBuffs(staff: Staff, menu: Food[]): Buffs {
   return b;
 }
 
-/**
- * 최종 수익 (인수분해한 형태). 트렌드 계수는 판매가 곱연산 뒤에 더한다.
- * Σ[(price_i + A)(1 + M) + trend_i] = (Σprice_i + n·A)(1 + M) + Σtrend_i
- */
+/** 총 음식 계수 (인수분해한 형태). Σ[(price_i + A + tMul_i)(1 + M) + tAdd_i] = (Σprice_i + n·A + ΣtMul_i)(1 + M) + ΣtAdd_i */
+export function foodCoefOf(priceSum: number, trend: TrendBonus, foodCount: number, b: Buffs): number {
+  return (priceSum + foodCount * b.priceAdd + trend.mul) * (1 + b.priceMul) + trend.add;
+}
+
+/** 최종 수익. 트렌드 계수는 태그 트렌드면 판매가 곱연산을 받고, 그 외는 곱연산 뒤에 더한다. */
 export function revenueOf(
   priceSum: number,
-  trendSum: number,
+  trendSum: TrendBonus,
   foodCount: number,
   b: Buffs,
   constants: Constants,
   popularity: number,
 ): number {
-  const foodCoef = (priceSum + foodCount * b.priceAdd) * (1 + b.priceMul) + trendSum;
-  return foodCoef * (trafficOf(b, constants) / 100) * (1 + popularity);
+  return foodCoefOf(priceSum, trendSum, foodCount, b) * (trafficOf(b, constants) / 100) * (1 + popularity);
 }
 
 /** 정렬 기준 값. costSum = 메뉴 전체 Σ_A M(A)·가격(A) */
 export function scoreOf(
   sortBy: SortBy,
   priceSum: number,
-  trendSum: number,
+  trendSum: TrendBonus,
   costSum: number,
   foodCount: number,
   b: Buffs,
@@ -110,11 +111,13 @@ export interface FoodLine {
   food: Food;
   price: number;
   priceAdd: number;
-  /** 가격 + 판매가 합연산 */
+  /** 판매가 곱연산을 받는 트렌드 계수 (태그 트렌드) */
+  trendMul: number;
+  /** 가격 + 판매가 합연산 + trendMul */
   subtotal: number;
   priceMul: number;
-  /** 판매가 곱연산 뒤에 더해지는 트렌드 계수 */
-  trend: number;
+  /** 판매가 곱연산 뒤에 더해지는 트렌드 계수 (과일·재료 트렌드) */
+  trendAdd: number;
   coef: number;
 }
 
@@ -175,15 +178,16 @@ export function calculate({ menu, ingredients, staff, trend, popularity, constan
   const trafficCoef = traffic / 100;
   const foods: FoodLine[] = menu.map((food) => {
     const t = trendBonus(trend, food, constants);
-    const subtotal = food.price + buffs.priceAdd;
+    const subtotal = food.price + buffs.priceAdd + t.mul;
     return {
       food,
       price: food.price,
       priceAdd: buffs.priceAdd,
+      trendMul: t.mul,
       subtotal,
       priceMul: buffs.priceMul,
-      trend: t,
-      coef: subtotal * (1 + buffs.priceMul) + t,
+      trendAdd: t.add,
+      coef: subtotal * (1 + buffs.priceMul) + t.add,
     };
   });
   const totalFoodCoef = foods.reduce((s, f) => s + f.coef, 0);

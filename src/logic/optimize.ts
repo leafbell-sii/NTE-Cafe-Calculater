@@ -1,6 +1,7 @@
 import { EFFECT_KINDS, type Constants, type Food, type Ingredient, type Staff, type Trend } from '../types';
 import {
   EPS,
+  foodCoefOf,
   foodIngredientCost,
   INGREDIENT_TRAFFIC_DIV,
   priceMap,
@@ -13,7 +14,7 @@ import {
   type Buffs,
   type SortBy,
 } from './calc';
-import { trendBonus } from './trends';
+import { addTrend, trendBonus, zeroTrend, type TrendBonus } from './trends';
 
 /** 소요 시간 경고 기준 (SPEC 6.3, 게임 데이터가 아니므로 코드 상수) */
 export const SLOW_WARN_MS = 2000;
@@ -119,7 +120,7 @@ function addBuffs(a: Buffs, b: Buffs): Buffs {
 
 interface MenuValues {
   priceSum: number;
-  trendSum: number;
+  trendSum: TrendBonus;
   /** Σ_A M(A)·가격(A) */
   costSum: number;
 }
@@ -140,7 +141,7 @@ function boundOf(
   popularity: number,
 ): number {
   if (sortBy === 'revenue') return revenueOf(m.priceSum, m.trendSum, n, hi, constants, popularity);
-  const foodCoef = (m.priceSum + n * hi.priceAdd) * (1 + hi.priceMul) + m.trendSum;
+  const foodCoef = foodCoefOf(m.priceSum, m.trendSum, n, hi);
   const bracket =
     foodCoef * (1 + popularity) - (reduceCoefOf(hi.ingredientReduce) * m.costSum * 100) / INGREDIENT_TRAFFIC_DIV;
   return (Math.max(trafficOf(hi, constants) * bracket, trafficOf(lo, constants) * bracket)) / 100;
@@ -169,7 +170,7 @@ export function optimize(input: OptimizeInput): OptimizeOutput {
   for (const idx of combinations(foods.length, menuSize)) {
     const menu = idx.map((i) => foods[i]);
     const priceSum = idx.reduce((s, i) => s + foods[i].price, 0);
-    const trendSum = idx.reduce((s, i) => s + trendBonuses[i], 0);
+    const trendSum = idx.reduce((s, i) => addTrend(s, trendBonuses[i]), zeroTrend());
     const costSum = idx.reduce((s, i) => s + foodCosts[i], 0);
     const vecs = owned.map((s) => staffBuffs(s, menu));
     const values = { priceSum, trendSum, costSum };
