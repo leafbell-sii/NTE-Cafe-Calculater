@@ -24,6 +24,16 @@
         var light = p === 'light' || (p !== 'dark' && matchMedia('(prefers-color-scheme: light)').matches);
         document.documentElement.dataset.theme = light ? 'light' : 'dark';
       })();
+      // 첫 렌더 전에 화면 모드 적용 (규칙은 src/view.ts와 동일)
+      (function () {
+        var v = null;
+        try { v = localStorage.getItem('nte-cafe:view'); } catch (e) {}
+        if (v !== 'mobile' && v !== 'desktop') v = 'auto';
+        var root = document.documentElement;
+        root.dataset.viewPref = v;
+        if (v === 'desktop') document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=1200');
+        root.dataset.view = v === 'auto' ? (matchMedia('(min-width: 900px)').matches ? 'desktop' : 'mobile') : v;
+      })();
     </script>
     <title>NTE 별미 카페 계산기</title>
   </head>

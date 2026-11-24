@@ -10,6 +10,7 @@ import { BUG_REPORT_URL } from './config';
 import { applyShareCode, buildShareUrl, copyText } from './share';
 import { nonNegNumber, oneOf, usePersistentState } from './persist';
 import { THEME_LABEL, useTheme } from './theme';
+import { VIEW_LABEL, useView } from './view';
 
 const loaded = loadGameData();
 
@@ -98,6 +99,7 @@ function Calculator({ data }: { data: GameData }) {
           <h2>기타</h2>
           <ShareButton />
           <ShareCodeInput />
+          <ViewButton />
           {BUG_REPORT_URL && (
             <a className="btn report-btn" href={BUG_REPORT_URL} target="_blank" rel="noopener noreferrer">
               🐞 버그 제보
@@ -175,6 +177,16 @@ function CupIcon() {
       <line x1="10" x2="10" y1="2" y2="4" />
       <line x1="14" x2="14" y1="2" y2="4" />
     </svg>
+  );
+}
+
+function ViewButton() {
+  const { view, toggle } = useView();
+  const target = view === 'desktop' ? 'mobile' : 'desktop';
+  return (
+    <button className="btn" onClick={toggle} title={`지금은 ${VIEW_LABEL[view]} 화면입니다`}>
+      {target === 'mobile' ? '📱' : '🖥'} {VIEW_LABEL[target]} 화면으로 보기
+    </button>
   );
 }
 
