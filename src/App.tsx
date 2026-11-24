@@ -130,7 +130,7 @@ function ShareCodeInput() {
     else setError(true);
   };
   return (
-    <form className="share-apply" onSubmit={onSubmit}>
+    <form className={error ? 'share-apply invalid' : 'share-apply'} onSubmit={onSubmit}>
       <input
         type="text"
         value={text}
@@ -142,7 +142,7 @@ function ShareCodeInput() {
           setError(false);
         }}
       />
-      <button type="submit" className="btn" disabled={!text.trim()}>
+      <button type="submit" className="share-send" disabled={!text.trim()}>
         {error ? '잘못된 코드' : '적용'}
       </button>
     </form>
