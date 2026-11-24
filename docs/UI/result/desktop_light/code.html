@@ -1,0 +1,552 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>별미 카페 계산기</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Space Grotesk & Pretendard/Noto Sans KR & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style data-purpose="base-styling">
+    body {
+      background-color: #F6F4FB;
+      color: #17122A;
+      font-family: 'Noto Sans KR', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .tnum {
+      font-feature-settings: 'tnum' on, 'lnum' on;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F6F4FB;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #DAD3EC;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #514870;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#F6F4FB] text-[#17122A] text-sm selection:bg-[#ECE6FD] selection:text-[#17122A]">
+<!-- BEGIN: MainContainer -->
+<div class="max-w-[1320px] mx-auto px-4 py-4 w-full">
+<!-- BEGIN: MainHeader -->
+<!-- Slim Header: ONLY small coffee cup icon and title '별미 카페 계산기' -->
+<header class="flex items-center gap-2.5 mb-5 pb-3 border-b border-[#DAD3EC]">
+<div class="w-8 h-8 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[#514870] shrink-0 shadow-sm" data-purpose="app-icon">
+<svg class="w-4 h-4 fill-none stroke-current" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 8h1a4 4 0 1 1 0 8h-1"></path>
+<path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"></path>
+<line x1="6" x2="6" y1="2" y2="4"></line>
+<line x1="10" x2="10" y1="2" y2="4"></line>
+<line x1="14" x2="14" y1="2" y2="4"></line>
+</svg>
+</div>
+<h1 class="text-lg font-bold tracking-tight text-[#17122A]">별미 카페 계산기</h1>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: GridContentLayout -->
+<main class="grid grid-cols-1 lg:grid-cols-[320px_1fr_200px] gap-4 items-start">
+<!-- BEGIN: LeftColumn (Settings & Characters) -->
+<aside class="flex flex-col gap-4">
+<!-- BEGIN: SettingsPanel -->
+<section class="bg-[#FFFFFF] border border-[#DAD3EC] rounded-[14px] p-4 shadow-sm" data-purpose="settings-panel">
+<h2 class="text-sm font-semibold text-[#17122A] mb-3 flex items-center gap-2">
+            설정
+          </h2>
+<div class="space-y-3.5">
+<!-- Popularity input -->
+<div>
+<div class="flex items-center justify-between mb-1.5 text-xs text-[#514870]">
+<label class="font-medium text-[#17122A]" for="popularity-input">인기도</label>
+<span class="text-xs text-[#625A82] tnum">×1.015</span>
+</div>
+<input class="w-full bg-[#FFFFFF] border border-[#DAD3EC] rounded-[10px] px-3 py-1.5 text-xs font-mono text-[#17122A] focus:outline-none focus:border-[#00706B]" id="popularity-input" type="text" value="0.015">
+</div>
+<!-- Trend dropdown -->
+<div>
+<label class="block text-xs font-medium text-[#17122A] mb-1.5" for="trend-select">트렌드</label>
+<select class="w-full bg-[#FFFFFF] border border-[#DAD3EC] rounded-[10px] px-2.5 py-1.5 text-xs text-[#17122A] focus:outline-none focus:border-[#00706B]" id="trend-select">
+<option selected="">전체 트렌드 평균 (범용)</option>
+<option>오늘의 추천 메뉴 트렌드</option>
+<option>음료 특화 트렌드</option>
+<option>디저트 특화 트렌드</option>
+</select>
+</div>
+<!-- Manekineko Checkbox -->
+<div class="pt-1 flex items-center justify-between border-t border-[#DAD3EC]">
+<label class="flex items-center gap-2 cursor-pointer text-xs">
+<input checked="" class="rounded-[6px] bg-[#FFFFFF] border-[#DAD3EC] text-[#00706B] focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5 accent-[#00706B]" type="checkbox">
+<span class="text-[#17122A] font-medium">마네키네코</span>
+</label>
+<span class="text-[11px] text-[#625A82]">유동인구 +1%</span>
+</div>
+</div></section>
+<!-- END: SettingsPanel -->
+<!-- BEGIN: CharacterRosterPanel -->
+<section class="bg-[#FFFFFF] border border-[#DAD3EC] rounded-[14px] p-4 shadow-sm" data-purpose="characters-panel">
+<div class="flex items-center justify-between mb-3"><h2 class="text-sm font-semibold text-[#17122A] flex items-center gap-1.5">보유 캐릭터 <span class="text-xs font-normal text-[#625A82] tnum">14/16</span></h2>
+<div class="flex items-center gap-1.5">
+<button class="px-2 py-0.5 text-[11px] bg-[#F6F4FB] border border-[#DAD3EC] hover:border-[#514870] text-[#514870] hover:text-[#17122A] rounded-[10px] transition" type="button">전체 선택</button>
+<button class="px-2 py-0.5 text-[11px] bg-[#F6F4FB] border border-[#DAD3EC] hover:border-[#514870] text-[#514870] hover:text-[#17122A] rounded-[10px] transition" type="button">전체 해제</button>
+</div></div>
+<!-- 4-column Character Grid -->
+<div class="grid grid-cols-4 gap-2"><!-- 1. 사키리 (Focused / Owned) -->
+<div class="bg-[#FFFFFF] border border-[#00706B] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer ring-2 ring-[#00706B] ring-offset-2 ring-offset-white shadow-sm" tabindex="0">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<img alt="사키리" class="w-full h-full object-cover object-top" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6c1JvkS3WNSrDXe7f8NURW22tbjFN762pRJizMyE_rxosz4VVJaxDgbA1PqySP_KtKOScbCNIKva080GmXJWZS4dbpqlOY-z0octA-kTSHyGdD4T6uV_lzWvXt-4lYYc2eca2sZt6voDzIlO16LL8PY2FlXIKGMS-q2u8I8EohDMc73ZQo-EXlqvezQ9lCinF7okmVvCM303Qh91QnR_Twl-stW6MZwWeoCgoxabAX1MABuM4QFtd">
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">사키리</span>
+</div>
+<!-- 2. 라크리모사 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">라크리모사</span>
+</div>
+<!-- 3. 나나리 (Not-owned / Dimmed) -->
+<div class="bg-[#F6F4FB] border border-[#DAD3EC]/70 rounded-[10px] p-1 flex flex-col items-center relative group cursor-not-allowed opacity-45">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#E6E1F2] text-[#625A82] text-[9px] font-medium rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-not-allowed" disabled="">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1 grayscale">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#625A82]"></div>
+</div>
+<span class="text-[11px] font-normal text-[#625A82] truncate max-w-full">나나리</span>
+</div>
+<!-- 4. 민트 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">민트</span>
+</div>
+<!-- 5. 백장 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<img alt="백장" class="w-full h-full object-cover object-top" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxPKR2SzBP63VSZ8RIH5Jvz7Lh53WwqDq-yNyWXrGIaeSG43o41T_5HI5GXdchXsmDP2kH22KALL5gCdfzX7tndk20EBRrse7qXP-4Smo8mD4wLEJH6OPytou4ZLM0LUxreLOQzbzzJPMIzqleMNHSxNI7GQl_qUwtKIcgN2uazMWzrNiSmwv7AVe8cse17PhQ0X-p4j64AVfAsL2uA-HbEFA-fcfhaID3u79LodYPj7Gr2w0gFSum">
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">백장</span>
+</div>
+<!-- 6. 다포딜 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">다포딜</span>
+</div>
+<!-- 7. 스키아 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 liberation leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">스키아</span>
+</div>
+<!-- 8. 에드가 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">에드가</span>
+</div>
+<!-- 9. 신쿠 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">신쿠</span>
+</div>
+<!-- 10. 링코 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">링코</span>
+</div>
+<!-- 11. 아카네 린 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">아카네 린</span>
+</div>
+<!-- 12. 우미츠키 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<img alt="우미츠키" class="w-full h-full object-cover object-top" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzVLXekPFGnwoF5WotofMWwTqVQCGuHYmKHPJKGXxtl3nSP9xgC_-9OOiuwUNOQEpj7oWzOJ4O55TD7FgNFux05VwHUrHpkBlNj71R3s2yUbXm1MatIlNig_EkuEjQ9ceIKcTqt2fd_k3suoyXmeo6Nw1viinTz8qHpjabIJ0jNIbEapIoes6i_JrEWfqGncxC-y1H8pXorxRQjKh4tcd_u0vhId8Sl0A6fVPG9O0zyoKv67O2t2SH">
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">우미츠키</span>
+</div>
+<!-- 13. 하니엘 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">하니엘</span>
+</div>
+<!-- 14. 아들러 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">아들러</span>
+</div>
+<!-- 15. 치즈 (Not-owned / Dimmed) -->
+<div class="bg-[#F6F4FB] border border-[#DAD3EC]/70 rounded-[10px] p-1 flex flex-col items-center relative group cursor-not-allowed opacity-45">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#E6E1F2] text-[#625A82] text-[9px] font-medium rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-not-allowed" disabled="">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1 grayscale">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#625A82]"></div>
+</div>
+<span class="text-[11px] font-normal text-[#625A82] truncate max-w-full">치즈</span>
+</div>
+<!-- 16. 일로이 (Owned) -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] rounded-[10px] p-1 flex flex-col items-center relative group cursor-pointer transition shadow-sm">
+<div class="absolute top-1 right-1 z-10">
+<select class="bg-[#ECE6FD] text-[#6D4CE0] text-[9px] font-bold rounded-[6px] border border-[#DAD3EC] px-1 py-0 h-4 leading-none tnum focus:outline-none cursor-pointer">
+<option selected="">5</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-[6px] overflow-hidden bg-[#E6E1F2] flex items-center justify-center mb-1">
+<div class="w-7 h-7 rounded-full bg-[#FFFFFF] border border-[#DAD3EC] flex items-center justify-center text-[10px] font-medium text-[#514870]"></div>
+</div>
+<span class="text-[11px] font-medium text-[#17122A] truncate max-w-full">일로이</span>
+</div></div>
+</section>
+<!-- END: CharacterRosterPanel -->
+</aside>
+<!-- END: LeftColumn -->
+<!-- BEGIN: CenterColumn (Recommendation Results) -->
+<section class="flex flex-col gap-3 min-w-0" data-purpose="recommendations-section">
+<!-- Results Bar: Title, Tabs, Meta -->
+<div class="flex flex-wrap items-center justify-between gap-2 pb-1"><div class="flex items-center gap-3">
+<h2 class="text-base font-bold text-[#17122A] tracking-tight">추천 조합</h2>
+<!-- Segmented control -->
+<div class="inline-flex rounded-[10px] bg-[#FFFFFF] border border-[#DAD3EC] p-0.5 shadow-sm" role="tablist">
+<button class="px-3 py-1 text-xs font-semibold rounded-[6px] bg-[#00706B] text-[#FFFFFF] shadow-sm transition" type="button">
+                매출순
+              </button>
+<button class="px-3 py-1 text-xs font-medium text-[#514870] hover:text-[#17122A] transition" type="button">
+                순수익순
+              </button>
+</div>
+</div>
+<div class="text-xs text-[#514870]">14명 중 10명 선택 · <span class="tnum">38ms</span></div></div>
+<!-- BEGIN: FeaturedRank1Card -->
+<!-- Featured Card #1: #EEEAF7 surface, subtle border in primary #00706B -->
+<article class="bg-[#EEEAF7] border-2 border-[#00706B] rounded-[20px] p-5 relative overflow-hidden shadow-sm" data-purpose="featured-rank-1">
+<!-- Top Row: Rank, Big Score, Percentage -->
+<div class="flex items-start justify-between border-b border-[#DAD3EC] pb-4 mb-4"><div class="flex items-start gap-3.5"><span class="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold border border-[#00706B] text-[#00706B] bg-[#FFFFFF] tracking-wide mt-1.5 shrink-0">1위</span><div><div class="text-[44px] leading-none font-bold tracking-tight text-[#17122A] tnum font-mono">2,719.69</div><div class="text-xs text-[#514870] font-medium mt-1">폰즈/시간 매출</div></div></div><div class="text-base font-bold text-[#00706B] tnum tracking-tight mt-1">100.00%</div></div>
+<!-- Breakdown Line -->
+<div class="text-xs mb-5 flex flex-wrap items-center gap-x-2.5 gap-y-1"><span class="text-[#514870]">매출 <strong class="text-[#17122A] tnum font-semibold">2,719.69</strong></span><span class="text-[#DAD3EC]">·</span><span class="text-[#C4314F]">식재료 <strong class="tnum font-semibold">−272.23</strong></span><span class="text-[#DAD3EC]">·</span><span class="text-[#2A6E43]">순수익 <strong class="tnum font-semibold">2,447.47</strong></span></div>
+<!-- Section: 메뉴 (Menu Items) -->
+<div class="mb-5"><div class="text-xs font-semibold text-[#514870] mb-2">메뉴</div>
+<div class="flex flex-wrap gap-2"><!-- Hot Orange Coffee -->
+<div class="bg-[#DEEDF8] border border-[#DAD3EC] rounded-[10px] px-2.5 py-1.5 flex flex-col gap-0.5">
+<span class="text-xs font-semibold text-[#17122A]">뜨거운 오렌지 커피</span>
+<span class="text-[11px] text-[#514870] flex items-center gap-1">
+<span class="text-[#2A6594] font-medium">음료</span>
+<span>·</span>
+<span class="tnum text-[#17122A]">15</span>
+<span class="text-[#8F6400] font-semibold tnum">★5/29</span>
+</span>
+</div>
+<!-- Crispy Coconut Cookie Macchiato -->
+<div class="bg-[#DEEDF8] border border-[#DAD3EC] rounded-[10px] px-2.5 py-1.5 flex flex-col gap-0.5">
+<span class="text-xs font-semibold text-[#17122A]">바삭한 코코넛 쿠키 마끼아또</span>
+<span class="text-[11px] text-[#514870] flex items-center gap-1">
+<span class="text-[#2A6594] font-medium">음료</span>
+<span>·</span>
+<span class="tnum text-[#17122A]">16</span>
+<span class="text-[#8F6400] font-semibold tnum">★6/29</span>
+</span>
+</div>
+<!-- Snow Covered Matcha Latte -->
+<div class="bg-[#DEEDF8] border border-[#DAD3EC] rounded-[10px] px-2.5 py-1.5 flex flex-col gap-0.5">
+<span class="text-xs font-semibold text-[#17122A]">눈 덮인 말차 라테</span>
+<span class="text-[11px] text-[#514870] flex items-center gap-1">
+<span class="text-[#2A6594] font-medium">음료</span>
+<span>·</span>
+<span class="tnum text-[#17122A]">16.5</span>
+<span class="text-[#8F6400] font-semibold tnum">★5/29</span>
+</span>
+</div>
+<!-- Tiramisu -->
+<div class="bg-[#F9E2EE] border border-[#DAD3EC] rounded-[10px] px-2.5 py-1.5 flex flex-col gap-0.5">
+<span class="text-xs font-semibold text-[#17122A]">티라미수</span>
+<span class="text-[11px] text-[#514870] flex items-center gap-1">
+<span class="text-[#9E3D6D] font-medium">디저트</span>
+<span>·</span>
+<span class="tnum text-[#17122A]">17</span>
+<span class="text-[#8F6400] font-semibold tnum">★5/29</span>
+</span>
+</div>
+<!-- Caramel Chocolate Crepe -->
+<div class="bg-[#F9E2EE] border border-[#DAD3EC] rounded-[10px] px-2.5 py-1.5 flex flex-col gap-0.5">
+<span class="text-xs font-semibold text-[#17122A]">캐러맬 초코 크레이프</span>
+<span class="text-[11px] text-[#514870] flex items-center gap-1">
+<span class="text-[#9E3D6D] font-medium">디저트</span>
+<span>·</span>
+<span class="tnum text-[#17122A]">18</span>
+<span class="text-[#8F6400] font-semibold tnum">★5/29</span>
+</span>
+</div></div></div>
+<!-- Section: 직원 10명 (10 Staff Members) -->
+<div class="mb-4"><div class="text-xs font-semibold text-[#514870] mb-2.5">직원 10명</div>
+<div class="grid grid-cols-5 sm:grid-cols-10 gap-2">
+<!-- 1. 사키리 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center">
+<img alt="사키리" class="w-full h-full object-cover object-top" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6c1JvkS3WNSrDXe7f8NURW22tbjFN762pRJizMyE_rxosz4VVJaxDgbA1PqySP_KtKOScbCNIKva080GmXJWZS4dbpqlOY-z0octA-kTSHyGdD4T6uV_lzWvXt-4lYYc2eca2sZt6voDzIlO16LL8PY2FlXIKGMS-q2u8I8EohDMc73ZQo-EXlqvezQ9lCinF7okmVvCM303Qh91QnR_Twl-stW6MZwWeoCgoxabAX1MABuM4QFtd">
+<span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span>
+</div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">사키리</span>
+</div>
+<!-- 2. 라크리모사 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center text-[10px] text-[#514870]"><span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span></div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">라크리모사</span>
+</div>
+<!-- 3. 백장 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center">
+<img alt="백장" class="w-full h-full object-cover object-top" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxPKR2SzBP63VSZ8RIH5Jvz7Lh53WwqDq-yNyWXrGIaeSG43o41T_5HI5GXdchXsmDP2kH22KALL5gCdfzX7tndk20EBRrse7qXP-4Smo8mD4wLEJH6OPytou4ZLM0LUxreLOQzbzzJPMIzqleMNHSxNI7GQl_qUwtKIcgN2uazMWzrNiSmwv7AVe8cse17PhQ0X-p4j64AVfAsL2uA-HbEFA-fcfhaID3u79LodYPj7Gr2w0gFSum">
+<span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span>
+</div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">백장</span>
+</div>
+<!-- 4. 에드가 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center text-[10px] text-[#514870]"><span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span></div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">에드가</span>
+</div>
+<!-- 5. 신쿠 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center text-[10px] text-[#514870]"><span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span></div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">신쿠</span>
+</div>
+<!-- 6. 링코 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center text-[10px] text-[#514870]"><span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span></div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">링코</span>
+</div>
+<!-- 7. 아카네 린 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center text-[10px] text-[#514870]"><span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span></div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">아카네 린</span>
+</div>
+<!-- 8. 우미츠키 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center">
+<img alt="우미츠키" class="w-full h-full object-cover object-top" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzVLXekPFGnwoF5WotofMWwTqVQCGuHYmKHPJKGXxtl3nSP9xgC_-9OOiuwUNOQEpj7oWzOJ4O55TD7FgNFux05VwHUrHpkBlNj71R3s2yUbXm1MatIlNig_EkuEjQ9ceIKcTqt2fd_k3suoyXmeo6Nw1viinTz8qHpjabIJ0jNIbEapIoes6i_JrEWfqGncxC-y1H8pXorxRQjKh4tcd_u0vhId8Sl0A6fVPG9O0zyoKv67O2t2SH">
+<span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span>
+</div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">우미츠키</span>
+</div>
+<!-- 9. 하니엘 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center text-[10px] text-[#514870]"><span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span></div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">하니엘</span>
+</div>
+<!-- 10. 일로이 -->
+<div class="flex flex-col items-center">
+<div class="relative w-10 h-10 rounded-full border border-[#DAD3EC] bg-[#E6E1F2] overflow-hidden mb-1 flex items-center justify-center text-[10px] text-[#514870]"><span class="absolute top-0 right-0 w-3.5 h-3.5 bg-[#ECE6FD] text-[#6D4CE0] border border-[#DAD3EC] font-bold text-[9px] rounded-full flex items-center justify-center tnum shadow-sm">5</span></div>
+<span class="text-[11px] text-[#17122A] truncate max-w-full">일로이</span>
+</div>
+</div></div>
+<!-- Bottom Actions inside Card #1 -->
+<div class="pt-3 border-t border-[#DAD3EC] flex flex-col gap-2.5 text-xs"><div class="flex items-center"><button class="px-3 py-1.5 bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] text-[#17122A] rounded-[10px] transition font-medium flex items-center gap-1.5" type="button"><span>대체 가능 직원 (3)</span></button></div><button class="w-full py-2 px-3 bg-[#FFFFFF] border border-[#DAD3EC] hover:border-[#514870] text-[#17122A] rounded-[10px] flex items-center justify-between transition text-xs font-medium group" type="button"><span class="flex items-center gap-1.5 text-[#00706B] font-semibold">▼ 영수증</span><span class="text-[10px] text-[#625A82] group-hover:text-[#17122A]">상세 내역</span></button><div class="bg-[#E6E1F2] border border-[#DAD3EC] rounded-[10px] p-4 text-xs font-mono space-y-4" style="font-family: 'JetBrains Mono', monospace; font-feature-settings: 'tnum' on, 'lnum' on;"><div class="border-b border-[#DAD3EC] pb-3 space-y-1.5"><div class="text-xs font-bold font-sans text-[#17122A] mb-1.5">1. 유동인구</div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>기본 유동인구</span><span class="text-[#17122A] tnum font-semibold">2,400P</span></div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>· 백장 Lv1 (합연산)</span><span class="text-[#17122A] tnum">+18P</span></div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>· 백장 Lv5 (합연산)</span><span class="text-[#17122A] tnum">+27P</span></div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>· 에드가 Lv1 (합연산)</span><span class="text-[#17122A] tnum">+18P</span></div><div class="flex justify-between items-baseline text-[11px] text-[#17122A] font-medium"><span>· 합연산 버프 총합</span><span class="text-[#17122A] tnum font-semibold">+297P</span></div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>· 마네키네코 (곱연산)</span><span class="text-[#17122A] tnum">+1.0%</span></div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>· 우미츠키 Lv2 <span class="text-[#2A6E43]">[음료 2개 이상 ✓]</span></span><span class="text-[#17122A] tnum">+1.0%</span></div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>· 우미츠키 Lv5 <span class="text-[#2A6E43]">[음료 2개 이상 ✓]</span></span><span class="text-[#17122A] tnum">+1.5%</span></div><div class="flex justify-between items-baseline text-[11px] text-[#17122A] pt-1 border-t border-[#DAD3EC]"><span>(2,400 + 297) × (1 + 3.5%)</span><span class="font-bold tnum text-[#17122A]">2,791.39P</span></div><div class="flex justify-between items-baseline text-[11px] text-[#625A82]"><span>유동인구 계수 (÷100)</span><span class="text-[#17122A] font-bold tnum">27.91</span></div></div><div class="border-b border-[#DAD3EC] pb-3 space-y-1.5"><div class="text-xs font-bold font-sans text-[#17122A] mb-1.5">2. 판매가 버프</div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>합연산 버프 총합</span><span class="text-[#17122A] tnum font-semibold">+1.56폰즈</span></div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>곱연산 버프 총합</span><span class="text-[#17122A] tnum font-semibold">+5.5%</span></div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>· 신쿠 Lv1 <span class="text-[#2A6E43]">[음료 3개 이상 ✓]</span></span><span class="text-[#17122A] tnum">+0.30폰즈</span></div><div class="flex justify-between items-baseline text-[11px] text-[#514870] opacity-50 line-through"><span>· 사키리 Lv5 [동일 태그 3개 이상 ✗ 미충족]</span><span class="tnum">+0.30폰즈</span></div></div><div class="border-b border-[#DAD3EC] pb-3 space-y-1.5"><div class="text-xs font-bold font-sans text-[#17122A] mb-1.5">3. 음식별 계산</div><div class="flex justify-between items-baseline gap-2 text-[11px] text-[#514870]"><span class="truncate"><strong class="text-[#17122A] font-medium">뜨거운 오렌지 커피</strong> (기본 15) 15 + 1.56 → ×(1 + 5.5%) + 0.12</span><span class="text-[#17122A] font-bold tnum shrink-0">= 17.59</span></div><div class="flex justify-between items-baseline gap-2 text-[11px] text-[#514870]"><span class="truncate"><strong class="text-[#17122A] font-medium">바삭한 코코넛 쿠키 마끼아또</strong> (기본 16) 16 + 1.56 → ×(1 + 5.5%) + 0.10</span><span class="text-[#17122A] font-bold tnum shrink-0">= 18.62</span></div><div class="flex justify-between items-baseline gap-2 text-[11px] text-[#514870]"><span class="truncate"><strong class="text-[#17122A] font-medium">눈 덮인 말차 라테</strong> (기본 16.5) 16.5 + 1.56 → ×(1 + 5.5%) + 0.15</span><span class="text-[#17122A] font-bold tnum shrink-0">= 19.25</span></div><div class="flex justify-between items-baseline gap-2 text-[11px] text-[#514870]"><span class="truncate"><strong class="text-[#17122A] font-medium">티라미수</strong> (기본 17) 17 + 1.56 → ×(1 + 5.5%) + 0.08</span><span class="text-[#17122A] font-bold tnum shrink-0">= 19.75</span></div><div class="flex justify-between items-baseline gap-2 text-[11px] text-[#514870]"><span class="truncate"><strong class="text-[#17122A] font-medium">캐러맬 초코 크레이프</strong> (기본 18) 18 + 1.56 + 0.03 = 19.59 → ×(1 + 5.5%) + 0.10</span><span class="text-[#17122A] font-bold tnum shrink-0">= 20.78</span></div></div><div class="border-b border-[#DAD3EC] pb-3 space-y-1.5"><div class="text-xs font-bold font-sans text-[#17122A] mb-1.5">4. 총 음식 계수</div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>17.59 + 18.62 + 19.25 + 19.75 + 20.78</span><span class="text-[#17122A] font-bold tnum text-xs">= 95.99</span></div></div><div class="border-b border-[#DAD3EC] pb-3 space-y-1.5"><div class="text-xs font-bold font-sans text-[#17122A] mb-1.5">5. 인기도</div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>설정 인기도 계수 적용</span><span class="text-[#17122A] font-bold tnum text-xs">×1.015</span></div></div><div class="border-b border-[#DAD3EC] pb-3 space-y-1.5"><div class="text-xs font-bold font-sans text-[#17122A] mb-1.5">6. 매출</div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>95.99 (총 음식 계수) × 27.91 (유동인구) × 1.015 (인기도)</span><span class="text-[#17122A] font-bold tnum text-xs">= 2,719.69</span></div></div><div class="border-b border-[#DAD3EC] pb-3 space-y-1.5"><div class="text-xs font-bold font-sans text-[#C4314F] mb-1.5">7. 식재료</div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>소모 감소 −19% 적용 (배율 0.81)</span><span class="text-[#625A82] text-[10px]">기본 감면</span></div><div class="flex justify-between items-baseline text-[10px] text-[#625A82]"><span>· 커피 원두 10개 · 2.26/시간 × 24</span><span class="text-[#17122A] tnum">54.26</span></div><div class="flex justify-between items-baseline text-[10px] text-[#625A82]"><span>· 우유 / 코코넛 밀크 등 유제품 소모</span><span class="text-[#17122A] tnum">98.42</span></div><div class="flex justify-between items-baseline text-[10px] text-[#625A82]"><span>· 말차 파우더 / 설탕 / 과일류 소모</span><span class="text-[#17122A] tnum">61.15</span></div><div class="flex justify-between items-baseline text-[10px] text-[#625A82]"><span>· 초콜릿 / 치즈 / 밀가루 베이킹 소모</span><span class="text-[#17122A] tnum">58.40</span></div><div class="flex justify-between items-baseline pt-1 border-t border-[#DAD3EC] text-[#C4314F] font-medium text-xs"><span>식재료 총액</span><span class="font-bold tnum">−272.23</span></div></div><div class="space-y-1.5"><div class="text-xs font-bold font-sans text-[#2A6E43] mb-1.5">8. 순수익</div><div class="flex justify-between items-baseline text-[11px] text-[#514870]"><span>2,719.69 (매출) − 272.23 (식재료)</span><span class="text-[#2A6E43] font-bold text-sm tnum">= 2,447.47</span></div></div></div></div>
+</article>
+<!-- END: FeaturedRank1Card -->
+<!-- BEGIN: CollapsedRows (Ranks 2-5) -->
+<div class="flex flex-col gap-2" data-purpose="ranked-rows-list"><!-- Rank 2 -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] rounded-[10px] px-3.5 py-2.5 min-h-[46px] h-auto flex items-center justify-between gap-3 transition cursor-pointer text-xs hover:border-[#514870] shadow-sm">
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 min-w-0 flex-1">
+<span class="text-[#514870] font-bold w-7 shrink-0 tnum">2위</span>
+<span class="font-bold text-[#17122A] text-sm tnum font-mono w-[68px] shrink-0">2,718.40</span>
+<span class="text-[#00706B] font-semibold tnum text-right w-[54px] shrink-0">99.95%</span>
+<span class="text-[#C4314F] font-medium tnum text-right w-[46px] shrink-0">−1.29</span>
+<div class="flex flex-wrap items-center gap-1 flex-1 min-w-0 text-[11px]">
+<span class="px-2 py-0.5 rounded-[6px] bg-[#F6F4FB] border border-[#DAD3EC] text-[#625A82] line-through shrink-0">−백장 Lv5</span>
+<span class="px-2 py-0.5 rounded-[6px] bg-[#ECE6FD] border border-[#DAD3EC] text-[#6D4CE0] font-medium shrink-0">+민트 Lv5</span>
+</div>
+</div>
+<span class="text-[#625A82] text-[11px] shrink-0">▸</span>
+</div>
+<!-- Rank 3 -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] rounded-[10px] px-3.5 py-2.5 min-h-[46px] h-auto flex items-center justify-between gap-3 transition cursor-pointer text-xs hover:border-[#514870] shadow-sm">
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 min-w-0 flex-1">
+<span class="text-[#514870] font-bold w-7 shrink-0 tnum">3위</span>
+<span class="font-bold text-[#17122A] text-sm tnum font-mono w-[68px] shrink-0">2,714.76</span>
+<span class="text-[#00706B] font-semibold tnum text-right w-[54px] shrink-0">99.81%</span>
+<span class="text-[#C4314F] font-medium tnum text-right w-[46px] shrink-0">−4.93</span>
+<div class="flex flex-wrap items-center gap-1 flex-1 min-w-0 text-[11px]">
+<span class="px-2 py-0.5 rounded-[6px] bg-[#F9E2EE] border border-[#DAD3EC] text-[#9E3D6D] line-through opacity-70 shrink-0">−티라미수</span>
+<span class="px-2 py-0.5 rounded-[6px] border border-[#DAD3EC] font-medium shrink-0 bg-[#FBE6DC] text-[#A24A26]">+햄 치즈 크루아상</span>
+<span class="px-2 py-0.5 rounded-[6px] bg-[#F6F4FB] border border-[#DAD3EC] text-[#625A82] line-through shrink-0">−라크리모사 Lv5</span>
+<span class="px-2 py-0.5 rounded-[6px] bg-[#ECE6FD] border border-[#DAD3EC] text-[#6D4CE0] font-medium shrink-0">+다포딜 Lv5</span>
+</div>
+</div>
+<span class="text-[#625A82] text-[11px] shrink-0">▸</span>
+</div>
+<!-- Rank 4 -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] rounded-[10px] px-3.5 py-2.5 min-h-[46px] h-auto flex items-center justify-between gap-3 transition cursor-pointer text-xs hover:border-[#514870] shadow-sm">
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 min-w-0 flex-1">
+<span class="text-[#514870] font-bold w-7 shrink-0 tnum">4위</span>
+<span class="font-bold text-[#17122A] text-sm tnum font-mono w-[68px] shrink-0">2,713.98</span>
+<span class="text-[#00706B] font-semibold tnum text-right w-[54px] shrink-0">99.78%</span>
+<span class="text-[#C4314F] font-medium tnum text-right w-[46px] shrink-0">−5.71</span>
+<div class="flex flex-wrap items-center gap-1 flex-1 min-w-0 text-[11px]">
+<span class="px-2 py-0.5 rounded-[6px] bg-[#F9E2EE] border border-[#DAD3EC] text-[#9E3D6D] line-through opacity-70 shrink-0">−티라미수</span>
+<span class="px-2 py-0.5 rounded-[6px] border border-[#DAD3EC] font-medium shrink-0 bg-[#FBE6DC] text-[#A24A26]">+햄 치즈 크루아상</span>
+<span class="px-2 py-0.5 rounded-[6px] bg-[#F6F4FB] border border-[#DAD3EC] text-[#625A82] line-through shrink-0">−라크리모사 Lv5</span>
+<span class="px-2 py-0.5 rounded-[6px] bg-[#ECE6FD] border border-[#DAD3EC] text-[#6D4CE0] font-medium shrink-0">+민트 Lv5</span>
+</div>
+</div>
+<span class="text-[#625A82] text-[11px] shrink-0">▸</span>
+</div>
+<!-- Rank 5 -->
+<div class="bg-[#FFFFFF] border border-[#DAD3EC] rounded-[10px] px-3.5 py-2.5 min-h-[46px] h-auto flex items-center justify-between gap-3 transition cursor-pointer text-xs hover:border-[#514870] shadow-sm">
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 min-w-0 flex-1">
+<span class="text-[#514870] font-bold w-7 shrink-0 tnum">5위</span>
+<span class="font-bold text-[#17122A] text-sm tnum font-mono w-[68px] shrink-0">2,711.74</span>
+<span class="text-[#00706B] font-semibold tnum text-right w-[54px] shrink-0">99.70%</span>
+<span class="text-[#C4314F] font-medium tnum text-right w-[46px] shrink-0">−7.95</span>
+<div class="flex flex-wrap items-center gap-1 flex-1 min-w-0 text-[11px]">
+<span class="px-2 py-0.5 rounded-[6px] bg-[#F9E2EE] border border-[#DAD3EC] text-[#9E3D6D] line-through opacity-70 shrink-0">−티라미수</span>
+<span class="px-2 py-0.5 rounded-[6px] border border-[#DAD3EC] font-medium shrink-0 bg-[#FBE6DC] text-[#A24A26]">+햄 치즈 크루아상</span>
+<span class="px-2 py-0.5 rounded-[6px] bg-[#F6F4FB] border border-[#DAD3EC] text-[#625A82] line-through shrink-0">−라크리모사 Lv5</span>
+<span class="px-2 py-0.5 rounded-[6px] bg-[#F6F4FB] border border-[#DAD3EC] text-[#625A82] line-through shrink-0">−백장 Lv5</span>
+<span class="px-2 py-0.5 rounded-[6px] bg-[#ECE6FD] border border-[#DAD3EC] text-[#6D4CE0] font-medium shrink-0">+민트 Lv5</span>
+<span class="px-2 py-0.5 rounded-[6px] bg-[#ECE6FD] border border-[#DAD3EC] text-[#6D4CE0] font-medium shrink-0">+아들러 Lv5</span>
+</div>
+</div>
+<span class="text-[#625A82] text-[11px] shrink-0">▸</span>
+</div></div>
+<!-- END: CollapsedRows -->
+<!-- Load More Button -->
+<button class="w-full py-2.5 bg-[#FFFFFF] border border-[#DAD3EC] text-[#514870] hover:text-[#17122A] rounded-[10px] text-xs font-medium transition hover:border-[#514870] shadow-sm" type="button">
+          더 보기 (+10)
+        </button>
+</section>
+<!-- END: CenterColumn -->
+<!-- BEGIN: RightColumn (Utilities & Info) -->
+<aside class="flex flex-col gap-4">
+<section class="bg-[#FFFFFF] border border-[#DAD3EC] rounded-[14px] p-4 shadow-sm" data-purpose="misc-panel"><h2 class="text-sm font-semibold text-[#17122A] mb-3">기타</h2>
+<div class="space-y-3">
+<!-- Share Link Button -->
+<button class="w-full py-2 px-3 bg-[#F6F4FB] border border-[#DAD3EC] hover:border-[#514870] text-[#17122A] rounded-[10px] text-xs font-medium transition flex items-center justify-center gap-1.5" type="button">
+<span>🔗 설정 공유 링크</span>
+</button>
+<!-- Import Link/Code -->
+<div class="space-y-1.5">
+<input class="w-full bg-[#FFFFFF] border border-[#DAD3EC] rounded-[10px] px-2.5 py-1.5 text-xs text-[#17122A] placeholder-[#625A82]/60 focus:outline-none focus:border-[#00706B]" placeholder="공유 링크 또는 코드" type="text">
+<button class="w-full py-1.5 bg-[#F6F4FB] border border-[#DAD3EC] hover:border-[#514870] text-[#514870] hover:text-[#17122A] rounded-[10px] text-xs transition font-medium" type="button">
+                적용
+              </button>
+</div>
+<!-- Bug Report Button -->
+<button class="w-full py-2 px-3 bg-[#F6F4FB] border border-[#DAD3EC] hover:border-[#514870] text-[#514870] hover:text-[#17122A] rounded-[10px] text-xs transition flex items-center justify-center gap-1.5" type="button">
+<span>🐞 버그 제보</span>
+</button>
+<!-- Metadata info -->
+<div class="pt-2 border-t border-[#DAD3EC] text-[11px] text-[#514870] space-y-1">
+<p>기본 유동인구 <span class="tnum text-[#17122A] font-semibold">2400P</span></p>
+<p>트렌드 계수 <span class="tnum text-[#17122A] font-semibold">+0.75</span> (태그 <span class="tnum text-[#17122A] font-semibold">+1.00</span>)</p>
+</div>
+<!-- Manual Test Link -->
+<div class="pt-2 text-center">
+<a class="text-xs text-[#514870] hover:text-[#17122A] underline underline-offset-4 decoration-[#DAD3EC] hover:decoration-[#17122A] transition" href="#manual-calc">
+                수동 계산 (테스트용)
+              </a>
+</div>
+</div></section>
+</aside>
+<!-- END: RightColumn -->
+</main>
+<!-- END: GridContentLayout -->
+</div>
+<!-- END: MainContainer -->
+
+
+</body></html>
