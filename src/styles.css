@@ -84,7 +84,7 @@ code {
 }
 
 .app {
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 16px;
   min-height: 100vh;
@@ -132,15 +132,32 @@ code {
   align-items: start;
 }
 @media (min-width: 900px) {
+  /* 좌: 설정 + 입력 / 중: 결과 / 우: 기타 */
   .layout {
-    grid-template-columns: 340px minmax(0, 1fr);
+    grid-template-columns: 320px minmax(0, 1fr) 200px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'settings results etc'
+      'inputs results etc';
     gap: 16px;
   }
+  .settings {
+    grid-area: settings;
+  }
   .inputs {
+    grid-area: inputs;
     position: sticky;
     top: 12px;
     max-height: calc(100vh - 24px);
     overflow-y: auto;
+  }
+  .results {
+    grid-area: results;
+  }
+  .etc {
+    grid-area: etc;
+    position: sticky;
+    top: 12px;
   }
 }
 
@@ -963,4 +980,55 @@ input:focus-visible {
 }
 .sort-toggle {
   margin-left: 0;
+}
+
+/* 좌상단 설정 패널 */
+.settings h2,
+.etc h2 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.settings .common-inputs {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.settings .hfield > .hfield-label {
+  width: 52px;
+}
+.settings .hfield select {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+}
+.settings .hfield.hcheck .hfield-label {
+  width: auto;
+}
+
+/* 우측 기타 패널 */
+.etc {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.etc h2 {
+  margin-bottom: 2px;
+}
+.etc .chip-btn {
+  text-align: center;
+  text-decoration: none;
+}
+.etc .share-apply {
+  flex-direction: column;
+}
+.etc .share-apply input {
+  width: 100%;
+}
+.etc-note {
+  margin: 6px 0 0;
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.6;
 }

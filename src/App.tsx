@@ -37,16 +37,6 @@ function Calculator({ data }: { data: GameData }) {
           ☕
         </span>
         <h1>별미 카페 계산기</h1>
-        <CommonInputs
-          trends={trends}
-          trendId={trendId}
-          onTrend={setTrendId}
-          popularity={popularity}
-          onPopularity={setPopularity}
-          maneki={maneki}
-          onManeki={setManeki}
-          manekiTrafficMul={data.constants.manekiTrafficMul}
-        />
         <div className="mode-toggle" role="group" aria-label="모드">
           <button aria-pressed={mode === 'optimize'} onClick={() => setMode('optimize')}>
             최적화
@@ -58,27 +48,42 @@ function Calculator({ data }: { data: GameData }) {
       </header>
 
       <main className="layout">
+        <section className="panel settings" aria-label="설정">
+          <h2>설정</h2>
+          <CommonInputs
+            trends={trends}
+            trendId={trendId}
+            onTrend={setTrendId}
+            popularity={popularity}
+            onPopularity={setPopularity}
+            maneki={maneki}
+            onManeki={setManeki}
+            manekiTrafficMul={data.constants.manekiTrafficMul}
+          />
+        </section>
+
         {mode === 'optimize' ? (
           <OptimizeMode data={data} trend={trend} popularity={popularity} maneki={maneki} />
         ) : (
           <ManualMode data={data} trend={trend} popularity={popularity} maneki={maneki} />
         )}
-      </main>
 
-      <footer className="footer">
-        <span>
-          기본 유동인구 {data.constants.baseTraffic}P · 트렌드 계수 +{data.constants.trendBonus} (태그 +{data.constants.tagTrendBonus.toFixed(2)})
-        </span>
-        <div className="footer-actions">
-          <ShareCodeInput />
+        <aside className="panel etc" aria-label="기타">
+          <h2>기타</h2>
           <ShareButton />
+          <ShareCodeInput />
           {BUG_REPORT_URL && (
             <a className="chip-btn report-btn" href={BUG_REPORT_URL} target="_blank" rel="noopener noreferrer">
               🐞 버그 제보
             </a>
           )}
-        </div>
-      </footer>
+          <p className="etc-note">
+            기본 유동인구 {data.constants.baseTraffic}P
+            <br />
+            트렌드 계수 +{data.constants.trendBonus} (태그 +{data.constants.tagTrendBonus.toFixed(2)})
+          </p>
+        </aside>
+      </main>
     </div>
   );
 }
