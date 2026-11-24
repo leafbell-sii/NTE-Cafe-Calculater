@@ -92,8 +92,8 @@ export function ResultCard({
         <div className="revenue">
           <span className="revenue-num">{fmt2(score)}</span>
           <span className="revenue-unit">폰즈/시간 {SORT_LABEL[sortBy]}</span>
-          {share !== undefined && <span className="share">{pct2(share)}</span>}
         </div>
+        {share !== undefined && <span className="share">{pct2(share)}</span>}
         {collapsible && (
           <button className="collapse-btn" aria-expanded onClick={() => setOpen(false)} aria-label="접기">
             ▾
@@ -102,9 +102,13 @@ export function ResultCard({
       </div>
 
       <p className="money-line">
-        <span>매출 {fmt2(receipt.revenue)}</span>
-        <span>식재료 −{fmt2(receipt.ingredientCost)}</span>
         <span>
+          매출 <b>{fmt2(receipt.revenue)}</b>
+        </span>
+        <span className="neg">
+          식재료 <b>−{fmt2(receipt.ingredientCost)}</b>
+        </span>
+        <span className="pos">
           순수익 <b>{fmt2(receipt.net)}</b>
         </span>
       </p>
@@ -117,7 +121,7 @@ export function ResultCard({
             <li key={f.id} className={`chip food ${TAG_CLASS[f.tag]}`}>
               <span className="chip-name">{f.name}</span>
               <span className="chip-sub">
-                {f.tag} · {f.price}
+                <span className="chip-tag">{f.tag}</span> · <span className="num">{f.price}</span>
                 <TrendMark trend={trend} food={f} />
               </span>
             </li>
@@ -135,9 +139,11 @@ export function ResultCard({
           <ul className="avatars">
             {staff.map((s) => (
               <li key={s.character.id} className="avatar" title={staffLabel(s)}>
-                <Portrait id={s.character.id} name={s.character.name} />
+                <span className="avatar-img">
+                  <Portrait id={s.character.id} name={s.character.name} />
+                  <span className="avatar-lv">{s.level}</span>
+                </span>
                 <span className="avatar-name">{s.character.name}</span>
-                <span className="avatar-lv">{s.level}</span>
               </li>
             ))}
           </ul>
@@ -168,7 +174,9 @@ export function ResultCard({
       )}
 
       <details className="receipt-wrap">
-        <summary>영수증</summary>
+        <summary>
+          영수증 <span className="summary-hint">계산 과정</span>
+        </summary>
         <ReceiptView receipt={receipt} />
       </details>
     </Tag>

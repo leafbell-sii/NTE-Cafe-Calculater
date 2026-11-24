@@ -10,13 +10,15 @@ interface Props {
   trend: Trend;
   popularity: number;
   maneki: boolean;
+  /** 최적화 모드로 돌아가기 */
+  onExit: () => void;
 }
 
 /** 빈 칸('') 또는 존재하는 id이면서 앞 칸과 겹치지 않는 값 */
 const uniqueIdOf = (ids: string[]) => (v: unknown, i: number, arr: unknown[]) =>
   v === '' || (typeof v === 'string' && ids.includes(v) && arr.indexOf(v) === i);
 
-export function ManualMode({ data, trend, popularity, maneki }: Props) {
+export function ManualMode({ data, trend, popularity, maneki, onExit }: Props) {
   const { maxFoods, maxStaff, maxSkillLevel } = data.constants;
   const [foodIds, setFoodIds] = usePersistentState<string[]>(
     'manual.foodIds',
@@ -126,6 +128,9 @@ export function ManualMode({ data, trend, popularity, maneki }: Props) {
       <section className="results">
         <div className="results-head">
           <h2>계산 결과</h2>
+          <button className="link-quiet meta" onClick={onExit}>
+            최적화 모드로 돌아가기
+          </button>
         </div>
         <ResultCard data={data} trend={trend} popularity={popularity} maneki={maneki} menu={menu} staff={staff} featured />
       </section>

@@ -121,7 +121,7 @@ export function OptimizeMode({ data, trend, popularity, maneki }: Props) {
       <section className="results" aria-live="polite">
         <div className="results-head">
           <h2>추천 조합</h2>
-          <div className="mode-toggle sort-toggle" role="group" aria-label="정렬 기준">
+          <div className="segmented" role="group" aria-label="정렬 기준">
             <button aria-pressed={sortBy === 'revenue'} onClick={() => setSortBy('revenue')}>
               매출순
             </button>
