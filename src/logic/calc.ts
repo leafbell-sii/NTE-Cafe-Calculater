@@ -23,6 +23,11 @@ export function foodIngredientCost(food: Food, prices: Map<string, number>): num
   return food.ingredients.reduce((s, i) => s + i.count * (prices.get(i.name) ?? 0), 0);
 }
 
+/** 직원 외 기본 버프. 마네키네코는 유동인구 곱연산 버프에 합산된다. */
+export function baseBuffs(maneki: boolean, constants: Constants): Buffs {
+  return { ...zeroBuffs(), trafficMul: maneki ? constants.manekiTrafficMul : 0 };
+}
+
 /** 최종 유동인구 */
 export function trafficOf(b: Buffs, constants: Constants): number {
   return (constants.baseTraffic + b.trafficAdd) * (1 + b.trafficMul);
@@ -134,6 +139,8 @@ export interface IngredientLine {
 
 export interface Receipt {
   baseTraffic: number;
+  /** 마네키네코 유동인구 곱연산 버프 (꺼져 있으면 0) */
+  maneki: number;
   effects: EffectLine[];
   buffs: Buffs;
   traffic: number;
@@ -160,13 +167,15 @@ export interface CalcInput {
   staff: Staff[];
   trend: Trend;
   popularity: number;
+  /** 마네키네코 사용 여부 (기본: 꺼짐) */
+  maneki?: boolean;
   constants: Constants;
 }
 
 /** 수익 계산 + 단계별 영수증 */
-export function calculate({ menu, ingredients, staff, trend, popularity, constants }: CalcInput): Receipt {
+export function calculate({ menu, ingredients, staff, trend, popularity, maneki = false, constants }: CalcInput): Receipt {
   const effects: EffectLine[] = [];
-  const buffs = zeroBuffs();
+  const buffs = baseBuffs(maneki, constants);
   for (const s of staff) {
     for (const effect of unlockedEffects(s)) {
       const met = conditionMet(effect.condition, menu);
@@ -208,6 +217,7 @@ export function calculate({ menu, ingredients, staff, trend, popularity, constan
   const ingredientCost = ingLines.reduce((s, l) => s + l.cost, 0);
   return {
     baseTraffic: constants.baseTraffic,
+    maneki: maneki ? constants.manekiTrafficMul : 0,
     effects,
     buffs,
     traffic,

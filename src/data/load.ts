@@ -56,6 +56,7 @@ const constantsSchema = z.object({
   baseTraffic: nonNeg,
   trendBonus: nonNeg,
   tagTrendBonus: nonNeg,
+  manekiTrafficMul: nonNeg,
   maxFoods: z.number().int().min(1),
   maxStaff: z.number().int().min(1),
   maxSkillLevel: z.number().int().min(1),

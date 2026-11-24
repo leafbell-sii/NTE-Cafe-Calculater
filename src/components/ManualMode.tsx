@@ -9,13 +9,14 @@ interface Props {
   data: GameData;
   trend: Trend;
   popularity: number;
+  maneki: boolean;
 }
 
 /** 빈 칸('') 또는 존재하는 id이면서 앞 칸과 겹치지 않는 값 */
 const uniqueIdOf = (ids: string[]) => (v: unknown, i: number, arr: unknown[]) =>
   v === '' || (typeof v === 'string' && ids.includes(v) && arr.indexOf(v) === i);
 
-export function ManualMode({ data, trend, popularity }: Props) {
+export function ManualMode({ data, trend, popularity, maneki }: Props) {
   const { maxFoods, maxStaff, maxSkillLevel } = data.constants;
   const [foodIds, setFoodIds] = usePersistentState<string[]>(
     'manual.foodIds',
@@ -126,7 +127,7 @@ export function ManualMode({ data, trend, popularity }: Props) {
         <div className="results-head">
           <h2>계산 결과</h2>
         </div>
-        <ResultCard data={data} trend={trend} popularity={popularity} menu={menu} staff={staff} featured />
+        <ResultCard data={data} trend={trend} popularity={popularity} maneki={maneki} menu={menu} staff={staff} featured />
       </section>
     </>
   );
