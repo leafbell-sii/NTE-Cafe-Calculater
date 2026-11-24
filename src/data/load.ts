@@ -14,7 +14,7 @@ const foodSchema = z.object({
   name: z.string().min(1),
   price: nonNeg,
   tag: tagSchema,
-  ingredients: z.array(z.object({ name: z.string().min(1), count: z.number().int().min(1, '1 이상이어야 합니다') })),
+  ingredients: z.array(z.object({ name: z.string().min(1), count: z.number().positive('0보다 커야 합니다') })),
 });
 
 const ingredientSchema = z.object({

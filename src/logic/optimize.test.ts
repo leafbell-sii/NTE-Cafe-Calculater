@@ -190,7 +190,7 @@ describe('계산', () => {
     expect(r.effects.filter((e) => e.effect.kind !== 'ingredientReduce').map((e) => e.met)).toEqual([true, false]);
   });
   it('식재료 소모량과 비용', () => {
-    // 애플파이(밀가루 2, 사과 2) + 티라미수(밀가루 3, 푸카 쿠키 2, 치즈 덩이 1, 커피 원두 1)
+    // 애플파이(밀가루 0.02, 사과 0.02) + 티라미수(밀가루 0.03, 푸카 쿠키 0.02, 치즈 덩이 0.01, 커피 원두 0.01)
     // 사키리 Lv5(감소 2%) + 우미츠키 Lv5(감소 1%), 백장 Lv1(+18P)
     const r = calculate({
       menu: [food('apple-pie'), food('tiramisu')],
@@ -204,11 +204,13 @@ describe('계산', () => {
       constants: data.constants, ingredients: data.ingredients,
     });
     expect(r.reduce).toBeCloseTo(0.03, 12);
-    const t = 2418 / 10000;
+    const t = 2418 / 100;
     const flour = r.ingredients.find((l) => l.name === '밀가루')!;
-    expect(flour.uses).toBe(5);
-    expect(flour.perHour).toBeCloseTo(t * 5 * 0.97, 12);
-    const costSum = 5 * 24 + 2 * 28 + 2 * 72 + 1 * 44 + 1 * 24;
+    expect(flour.uses).toBeCloseTo(0.05, 12);
+    expect(flour.perHour).toBeCloseTo(t * 0.05 * 0.97, 12);
+    // 개념 변경 전(유동인구/10000 × 정수 개수)과 같은 값
+    expect(flour.perHour).toBeCloseTo((2418 / 10000) * 5 * 0.97, 12);
+    const costSum = 0.05 * 24 + 0.02 * 28 + 0.02 * 72 + 0.01 * 44 + 0.01 * 24;
     expect(r.ingredientCost).toBeCloseTo(t * 0.97 * costSum, 10);
     expect(r.net).toBeCloseTo(r.revenue - r.ingredientCost, 10);
   });

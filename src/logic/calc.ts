@@ -13,8 +13,11 @@ export const zeroBuffs = (): Buffs => ({ priceAdd: 0, priceMul: 0, trafficAdd: 0
 export const SORT_BYS = ['revenue', 'net'] as const;
 export type SortBy = (typeof SORT_BYS)[number];
 
-/** 식재료 소모량 계산의 유동인구 나눗수: 시간당 소모량 = 유동인구 / 10000 × M(A) × (1 − 감소량) */
-export const INGREDIENT_TRAFFIC_DIV = 10000;
+/**
+ * 식재료 소모량 계산의 유동인구 나눗수: 시간당 소모량 = 유동인구 / 100 × M(A) × (1 − 감소량)
+ * 소모 개수는 게임 내 표기대로 0.01 단위(밀가루 1개 → 0.01)로 적는다.
+ */
+export const INGREDIENT_TRAFFIC_DIV = 100;
 
 export const priceMap = (ingredients: Ingredient[]) => new Map(ingredients.map((i) => [i.name, i.price]));
 
@@ -36,7 +39,7 @@ export function trafficOf(b: Buffs, constants: Constants): number {
 /** 식재료 소모 배율 (1 − 감소량, 0 미만으로 내려가지 않음) */
 export const reduceCoefOf = (reduce: number) => Math.max(0, 1 - reduce);
 
-/** 시간당 식재료 비용 = 유동인구 / 10000 × (1 − 감소량) × Σ_A M(A)·가격(A) */
+/** 시간당 식재료 비용 = 유동인구 / 100 × (1 − 감소량) × Σ_A M(A)·가격(A) */
 export function ingredientCostOf(traffic: number, reduce: number, costSum: number): number {
   return (traffic / INGREDIENT_TRAFFIC_DIV) * reduceCoefOf(reduce) * costSum;
 }
