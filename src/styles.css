@@ -135,6 +135,11 @@ code {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  container: app / inline-size;
+}
+/* 넓은 화면에서 모바일 화면을 강제하면 휴대폰 폭으로 좁힌다 */
+:root[data-view-pref='mobile'] .app {
+  max-width: 480px;
 }
 
 /* header */
@@ -219,35 +224,34 @@ code {
   flex: 1;
   align-items: start;
 }
-@media (min-width: 900px) {
-  /* 좌: 설정 + 입력 / 중: 결과 / 우: 기타 */
-  .layout {
-    grid-template-columns: 320px minmax(0, 1fr) 200px;
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      'settings results etc'
-      'inputs results etc';
-  }
-  .settings {
-    grid-area: settings;
-  }
-  .inputs {
-    grid-area: inputs;
-    position: sticky;
-    top: 12px;
-    max-height: calc(100vh - 24px);
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-  .results {
-    grid-area: results;
-  }
-  .etc {
-    grid-area: etc;
-    position: sticky;
-    top: 12px;
-  }
+/* 컴퓨터 화면 (data-view: src/view.ts) */
+/* 좌: 설정 + 입력 / 중: 결과 / 우: 기타 */
+:root[data-view='desktop'] .layout {
+  grid-template-columns: 320px minmax(0, 1fr) 200px;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    'settings results etc'
+    'inputs results etc';
+}
+:root[data-view='desktop'] .settings {
+  grid-area: settings;
+}
+:root[data-view='desktop'] .inputs {
+  grid-area: inputs;
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+:root[data-view='desktop'] .results {
+  grid-area: results;
+}
+:root[data-view='desktop'] .etc {
+  grid-area: etc;
+  position: sticky;
+  top: 12px;
 }
 
 .panel {
@@ -529,10 +533,8 @@ select optgroup {
 .staff-grid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
-@media (max-width: 899px) {
-  .char-grid {
-    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
-  }
+:root[data-view='mobile'] .char-grid {
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
 }
 .tile {
   position: relative;
@@ -1267,7 +1269,8 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
-@media (max-width: 599px) {
+/* 좁은 폭: 창 599px 이하(.app 좌우 패딩 32px 제외 567px) 또는 모바일 강제 */
+@container app (max-width: 567px) {
   .card.featured {
     padding: 16px;
   }
