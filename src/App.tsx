@@ -19,17 +19,32 @@ export default function App() {
 }
 
 const MODES = ['optimize', 'manual'] as const;
+
+/** 설정 카드 기본값 (SPEC 4.1) */
+const SETTINGS_DEFAULT = { popularity: 0, trendId: AVERAGE_TREND_ID, maneki: false };
 type Mode = (typeof MODES)[number];
 
 function Calculator({ data }: { data: GameData }) {
   const trends = useMemo(() => buildTrends(data), [data]);
   const [mode, setMode] = usePersistentState<Mode>('mode', () => 'optimize', oneOf(MODES));
-  const [popularity, setPopularity] = usePersistentState('popularity', () => 0, nonNegNumber);
-  const [maneki, setManeki] = usePersistentState('maneki', () => false, (v) => (typeof v === 'boolean' ? v : undefined));
-  const [trendId, setTrendId] = usePersistentState('trendId', () => AVERAGE_TREND_ID, (v) =>
+  const [popularity, setPopularity] = usePersistentState('popularity', () => SETTINGS_DEFAULT.popularity, nonNegNumber);
+  const [maneki, setManeki] = usePersistentState('maneki', () => SETTINGS_DEFAULT.maneki, (v) =>
+    typeof v === 'boolean' ? v : undefined,
+  );
+  const [trendId, setTrendId] = usePersistentState('trendId', () => SETTINGS_DEFAULT.trendId, (v) =>
     trends.some((t) => t.id === v) ? (v as string) : undefined,
   );
   const trend = trends.find((t) => t.id === trendId) ?? NONE_TREND;
+  // 인기도 입력칸은 자체 텍스트 상태를 가지므로 초기화 때 다시 마운트한다.
+  const [inputsKey, setInputsKey] = useState(0);
+  const isDefault =
+    popularity === SETTINGS_DEFAULT.popularity && maneki === SETTINGS_DEFAULT.maneki && trendId === SETTINGS_DEFAULT.trendId;
+  const resetSettings = () => {
+    setPopularity(SETTINGS_DEFAULT.popularity);
+    setManeki(SETTINGS_DEFAULT.maneki);
+    setTrendId(SETTINGS_DEFAULT.trendId);
+    setInputsKey((k) => k + 1);
+  };
 
   return (
     <div className="app">
@@ -43,8 +58,19 @@ function Calculator({ data }: { data: GameData }) {
 
       <main className="layout">
         <section className="panel settings" aria-label="설정">
-          <h2>설정</h2>
+          <div className="section-head">
+            <h2>설정</h2>
+            <button
+              className="reset-btn"
+              onClick={resetSettings}
+              disabled={isDefault}
+              title="인기도·트렌드·마네키네코를 기본값으로 되돌립니다"
+            >
+              ↺ 설정 초기화
+            </button>
+          </div>
           <CommonInputs
+            key={inputsKey}
             trends={trends}
             trendId={trendId}
             onTrend={setTrendId}
