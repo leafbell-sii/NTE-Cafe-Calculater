@@ -60,7 +60,15 @@ export function ReceiptView({ receipt: r }: { receipt: Receipt }) {
           <li className="r-sub">합연산 (P)</li>
           <EffectRows lines={byKind(traffic, 'trafficAdd')} />
           <li className="r-sub">곱연산 (%)</li>
-          <EffectRows lines={byKind(traffic, 'trafficMul')} />
+          {r.maneki > 0 && (
+            <li className="r-row">
+              <span>마네키네코</span>
+              <span className="r-val">+{pct(r.maneki)}</span>
+            </li>
+          )}
+          {(r.maneki === 0 || byKind(traffic, 'trafficMul').length > 0) && (
+            <EffectRows lines={byKind(traffic, 'trafficMul')} />
+          )}
           <li className="r-row total">
             <span>
               ({fmt(r.baseTraffic)} + {fmt(r.buffs.trafficAdd)}) × (1 + {pct(r.buffs.trafficMul)})

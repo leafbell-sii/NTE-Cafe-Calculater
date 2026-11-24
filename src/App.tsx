@@ -24,6 +24,7 @@ function Calculator({ data }: { data: GameData }) {
   const trends = useMemo(() => buildTrends(data), [data]);
   const [mode, setMode] = usePersistentState<Mode>('mode', () => 'optimize', oneOf(MODES));
   const [popularity, setPopularity] = usePersistentState('popularity', () => 0, nonNegNumber);
+  const [maneki, setManeki] = usePersistentState('maneki', () => false, (v) => (typeof v === 'boolean' ? v : undefined));
   const [trendId, setTrendId] = usePersistentState('trendId', () => AVERAGE_TREND_ID, (v) =>
     trends.some((t) => t.id === v) ? (v as string) : undefined,
   );
@@ -42,6 +43,9 @@ function Calculator({ data }: { data: GameData }) {
           onTrend={setTrendId}
           popularity={popularity}
           onPopularity={setPopularity}
+          maneki={maneki}
+          onManeki={setManeki}
+          manekiTrafficMul={data.constants.manekiTrafficMul}
         />
         <div className="mode-toggle" role="group" aria-label="모드">
           <button aria-pressed={mode === 'optimize'} onClick={() => setMode('optimize')}>
@@ -55,9 +59,9 @@ function Calculator({ data }: { data: GameData }) {
 
       <main className="layout">
         {mode === 'optimize' ? (
-          <OptimizeMode data={data} trend={trend} popularity={popularity} />
+          <OptimizeMode data={data} trend={trend} popularity={popularity} maneki={maneki} />
         ) : (
-          <ManualMode data={data} trend={trend} popularity={popularity} />
+          <ManualMode data={data} trend={trend} popularity={popularity} maneki={maneki} />
         )}
       </main>
 

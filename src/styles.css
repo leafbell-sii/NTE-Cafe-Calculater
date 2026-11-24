@@ -200,6 +200,13 @@ code {
 .hfield input {
   width: 84px;
 }
+.hfield.hcheck {
+  cursor: pointer;
+}
+.hfield.hcheck input {
+  width: auto;
+  accent-color: var(--accent);
+}
 .hfield select {
   max-width: 240px;
 }

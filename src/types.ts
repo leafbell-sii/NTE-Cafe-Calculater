@@ -58,6 +58,8 @@ export interface Constants {
   baseTraffic: number;
   trendBonus: number;
   tagTrendBonus: number;
+  /** 마네키네코: 유동인구 곱연산 버프 (다른 곱연산 버프와 합산) */
+  manekiTrafficMul: number;
   maxFoods: number;
   maxStaff: number;
   maxSkillLevel: number;

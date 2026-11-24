@@ -1,5 +1,6 @@
 import { EFFECT_KINDS, type Constants, type Food, type Ingredient, type Staff, type Trend } from '../types';
 import {
+  baseBuffs,
   EPS,
   foodCoefOf,
   foodIngredientCost,
@@ -29,6 +30,8 @@ export interface OptimizeInput {
   owned: Staff[];
   trend: Trend;
   popularity: number;
+  /** 마네키네코 사용 여부 (기본: 꺼짐) */
+  maneki?: boolean;
   constants: Constants;
   /** 필요한 결과(묶음) 개수 */
   k: number;
@@ -150,7 +153,8 @@ function boundOf(
 /** SPEC 6 최적화: 분기 한정으로 정확한 상위 K개 결과(묶음 기준)를 구한다. */
 export function optimize(input: OptimizeInput): OptimizeOutput {
   const t0 = performance.now();
-  const { foods, ingredients, sortBy = 'revenue', owned, trend, popularity, constants, k } = input;
+  const { foods, ingredients, sortBy = 'revenue', owned, trend, popularity, maneki = false, constants, k } = input;
+  const base = baseBuffs(maneki, constants);
   const menuSize = Math.min(constants.maxFoods, foods.length);
   const slots = Math.min(constants.maxStaff, owned.length);
   const trendBonuses = foods.map((f) => trendBonus(trend, f, constants));
@@ -174,7 +178,7 @@ export function optimize(input: OptimizeInput): OptimizeOutput {
     const costSum = idx.reduce((s, i) => s + foodCosts[i], 0);
     const vecs = owned.map((s) => staffBuffs(s, menu));
     const values = { priceSum, trendSum, costSum };
-    menus.push({ idx, ...values, vecs, bound: bound(values, zeroBuffs(), topSums(vecs, 0, slots)) });
+    menus.push({ idx, ...values, vecs, bound: bound(values, base, addBuffs(base, topSums(vecs, 0, slots))) });
   }
   menus.sort((a, b) => b.bound - a.bound || compareIdx(a.idx, b.idx));
 
@@ -207,7 +211,7 @@ export function optimize(input: OptimizeInput): OptimizeOutput {
       chosen.pop();
       dfs(i + 1, cur);
     };
-    dfs(0, zeroBuffs());
+    dfs(0, base);
     if (!found.length) continue;
 
     // 같은 메뉴 + 같은 수익 묶기

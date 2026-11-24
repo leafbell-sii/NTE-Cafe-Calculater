@@ -2,6 +2,7 @@
   "baseTraffic": 2400,
   "trendBonus": 0.75,
   "tagTrendBonus": 1.0,
+  "manekiTrafficMul": 0.01,
   "maxFoods": 5,
   "maxStaff": 10,
   "maxSkillLevel": 5

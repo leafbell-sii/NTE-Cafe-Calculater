@@ -146,6 +146,17 @@ describe('계산', () => {
     const traffic = (2400 + 18) * (1 + 0.025);
     expect(r.revenue).toBeCloseTo(foodCoef * (traffic / 100) * 1.015, 10);
   });
+  it('마네키네코는 유동인구 곱연산 버프에 합산', () => {
+    const menu = [food('iced-mocha'), food('golden-amber')];
+    const staff: Staff[] = [{ character: byId('umitsuki'), level: 5 }]; // 음료 2개: 유동인구 +2.5%
+    const calc = (maneki: boolean) =>
+      calculate({ menu, staff, trend: NONE_TREND, popularity: 0, maneki, constants: data.constants, ingredients: data.ingredients });
+    const on = calc(true);
+    expect(on.maneki).toBe(0.01);
+    expect(on.buffs.trafficMul).toBeCloseTo(0.035, 12);
+    expect(on.traffic).toBeCloseTo(2400 * (1 + 0.025 + 0.01), 10);
+    expect(calc(false).traffic).toBeCloseTo(2400 * 1.025, 10);
+  });
   it('신쿠 Lv1 + Lv3 조건이 같아도 각각 적용', () => {
     const menu = [food('iced-mocha'), food('golden-amber'), food('ganache-chocolate-latte')];
     const r = calculate({
@@ -225,7 +236,7 @@ interface BruteGroup {
   combos: number[][];
 }
 
-function brute(owned: Staff[], t: Trend, popularity: number, foodsSubset = data.foods, sortBy: SortBy = 'revenue'): BruteGroup[] {
+function brute(owned: Staff[], t: Trend, popularity: number, foodsSubset = data.foods, sortBy: SortBy = 'revenue', maneki = false): BruteGroup[] {
   const fi = foodsSubset.map((_, i) => i);
   const si = owned.map((_, i) => i);
   const menuSize = Math.min(5, foodsSubset.length);
@@ -236,7 +247,7 @@ function brute(owned: Staff[], t: Trend, popularity: number, foodsSubset = data.
     const rows = [...combos(si, slots)].map((c) => ({
       c,
       revenue: (() => {
-        const r = calculate({ menu, staff: c.map((i) => owned[i]), trend: t, popularity, constants: data.constants, ingredients: data.ingredients });
+        const r = calculate({ menu, staff: c.map((i) => owned[i]), trend: t, popularity, maneki, constants: data.constants, ingredients: data.ingredients });
         return sortBy === 'net' ? r.net : r.revenue;
       })(),
     }));
@@ -256,9 +267,9 @@ function brute(owned: Staff[], t: Trend, popularity: number, foodsSubset = data.
   return groups;
 }
 
-function check(owned: Staff[], t: Trend, popularity: number, k: number, foodsSubset = data.foods, sortBy: SortBy = 'revenue') {
-  const expected = brute(owned, t, popularity, foodsSubset, sortBy);
-  const { groups } = optimize({ foods: foodsSubset, owned, trend: t, popularity, constants: data.constants, ingredients: data.ingredients, k, sortBy });
+function check(owned: Staff[], t: Trend, popularity: number, k: number, foodsSubset = data.foods, sortBy: SortBy = 'revenue', maneki = false) {
+  const expected = brute(owned, t, popularity, foodsSubset, sortBy, maneki);
+  const { groups } = optimize({ foods: foodsSubset, owned, trend: t, popularity, maneki, constants: data.constants, ingredients: data.ingredients, k, sortBy });
   expect(groups.length).toBeGreaterThanOrEqual(Math.min(k, expected.length));
   // 반환된 결과는 브루트포스 상위와 일치 (동점 포함)
   groups.forEach((g, i) => {
@@ -310,6 +321,11 @@ describe('최적화 = 브루트포스', () => {
     const owned = data.characters.slice(0, 12).map((c, i) => ({ character: c, level: ((i * 2) % 5) + 1 }));
     check(owned, trend('average'), 0.03, 20, foodsSmall);
     check(owned, trend('average'), 0.03, 20, foodsSmall, 'net');
+  });
+  it('마네키네코 · 보유 12명 · 매출/순수익', () => {
+    const owned = data.characters.slice(0, 12).map((c, i) => ({ character: c, level: ((i * 4) % 5) + 1 }));
+    check(owned, trend('tag:음료'), 0.02, 20, foodsSmall, 'revenue', true);
+    check(owned, trend('tag:음료'), 0.02, 20, foodsSmall, 'net', true);
   });
   it('보유 0명', () => {
     check([], trend('tag:디저트'), 0, 5, foodsSmall);

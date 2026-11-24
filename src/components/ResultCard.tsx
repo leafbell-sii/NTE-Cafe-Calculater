@@ -11,6 +11,7 @@ interface Props {
   data: GameData;
   trend: Trend;
   popularity: number;
+  maneki: boolean;
   /** 최적화 정렬 기준. 순위 비율·차이도 이 값 기준 (수동 모드는 매출) */
   sortBy?: SortBy;
   menu: Food[];
@@ -40,6 +41,7 @@ export function ResultCard({
   data,
   trend,
   popularity,
+  maneki,
   sortBy = 'revenue',
   menu,
   staff,
@@ -50,8 +52,8 @@ export function ResultCard({
   base,
 }: Props) {
   const receipt = useMemo(
-    () => calculate({ menu, ingredients: data.ingredients, staff, trend, popularity, constants: data.constants }),
-    [menu, staff, trend, popularity, data],
+    () => calculate({ menu, ingredients: data.ingredients, staff, trend, popularity, maneki, constants: data.constants }),
+    [menu, staff, trend, popularity, maneki, data],
   );
   const score = scoreOf(receipt, sortBy);
   const [showAlt, setShowAlt] = useState(false);

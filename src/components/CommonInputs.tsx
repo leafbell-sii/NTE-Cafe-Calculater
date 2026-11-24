@@ -7,6 +7,10 @@ interface Props {
   onTrend: (id: string) => void;
   popularity: number;
   onPopularity: (v: number) => void;
+  maneki: boolean;
+  onManeki: (v: boolean) => void;
+  /** 마네키네코 유동인구 곱연산 버프 */
+  manekiTrafficMul: number;
 }
 
 const exact = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 6 });
@@ -17,7 +21,7 @@ const GROUP_LABEL: Record<Exclude<TrendKind, 'none' | 'average'>, string> = {
   ingredient: '재료',
 };
 
-export function CommonInputs({ trends, trendId, onTrend, popularity, onPopularity }: Props) {
+export function CommonInputs({ trends, trendId, onTrend, popularity, onPopularity, maneki, onManeki, manekiTrafficMul }: Props) {
   const [text, setText] = useState(popularity ? String(popularity) : '');
 
   const onText = (raw: string) => {
@@ -66,6 +70,12 @@ export function CommonInputs({ trends, trendId, onTrend, popularity, onPopularit
             </optgroup>
           ))}
         </select>
+      </label>
+
+      <label className="hfield hcheck" title="유동인구 곱연산 버프에 합산됩니다">
+        <input type="checkbox" checked={maneki} onChange={(e) => onManeki(e.target.checked)} />
+        <span className="hfield-label">마네키네코</span>
+        <span className="hfield-help">유동인구 +{exact.format(manekiTrafficMul * 100)}%</span>
       </label>
     </div>
   );

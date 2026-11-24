@@ -11,12 +11,13 @@ interface Props {
   data: GameData;
   trend: Trend;
   popularity: number;
+  maneki: boolean;
 }
 
 const INITIAL = 5;
 const STEP = 10;
 
-export function OptimizeMode({ data, trend, popularity }: Props) {
+export function OptimizeMode({ data, trend, popularity, maneki }: Props) {
   const max = data.constants.maxSkillLevel;
   const ids = data.characters.map((c) => c.id);
   const [owned, setOwned] = usePersistentState<Record<string, boolean>>(
@@ -38,7 +39,7 @@ export function OptimizeMode({ data, trend, popularity }: Props) {
   );
 
   // 입력이 바뀌면 처음 5개로 되돌림
-  const inputKey = `${sortBy}|${trend.id}|${popularity}|${staff.map((s) => `${s.character.id}:${s.level}`).join(',')}`;
+  const inputKey = `${sortBy}|${trend.id}|${popularity}|${maneki}|${staff.map((s) => `${s.character.id}:${s.level}`).join(',')}`;
   const [lastKey, setLastKey] = useState(inputKey);
   if (lastKey !== inputKey) {
     setLastKey(inputKey);
@@ -56,10 +57,11 @@ export function OptimizeMode({ data, trend, popularity }: Props) {
         owned: staff,
         trend,
         popularity,
+        maneki,
         constants: data.constants,
         k,
       }),
-    [data, sortBy, staff, trend, popularity, k],
+    [data, sortBy, staff, trend, popularity, maneki, k],
   );
   const visible = groups.slice(0, shown);
   const ownedCount = staff.length;
@@ -144,6 +146,7 @@ export function OptimizeMode({ data, trend, popularity }: Props) {
                 data={data}
                 trend={trend}
                 popularity={popularity}
+                maneki={maneki}
                 sortBy={sortBy}
                 rank={g.rank}
                 menu={g.menu}
