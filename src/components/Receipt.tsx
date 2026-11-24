@@ -98,8 +98,9 @@ export function ReceiptView({ receipt: r }: { receipt: Receipt }) {
             <li key={f.food.id} className="r-food">
               <span className="r-food-name">{f.food.name}</span>
               <span className="r-food-calc">
-                ({fmt(f.price)} + {fmt(f.priceAdd)} = {fmt2(f.subtotal)}) × (1 + {pct(f.priceMul)})
-                {f.trend > 0 && <b className="trend-mark"> + {fmt(f.trend)}</b>} = <b>{fmt2(f.coef)}</b>
+                ({fmt(f.price)} + {fmt(f.priceAdd)}
+                {f.trendMul > 0 && <b className="trend-mark"> + {fmt(f.trendMul)}</b>} = {fmt2(f.subtotal)}) × (1 + {pct(f.priceMul)})
+                {f.trendAdd > 0 && <b className="trend-mark"> + {fmt(f.trendAdd)}</b>} = <b>{fmt2(f.coef)}</b>
               </span>
             </li>
           ))}

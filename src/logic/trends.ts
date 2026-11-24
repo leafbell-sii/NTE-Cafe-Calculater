@@ -62,13 +62,35 @@ export function trendCoef(trend: Trend, constants: Constants): number {
   return trend.kind === 'tag' ? constants.tagTrendBonus : constants.trendBonus;
 }
 
+/**
+ * 트렌드 계수. 판매가 곱연산 버프의 적용 여부로 나눈다.
+ * - mul: 판매가 곱연산 버프가 곱해지는 몫 (태그 트렌드, 인게임 확인)
+ * - add: 곱연산 뒤에 더해지는 몫 (재료 트렌드 인게임 확인, 과일 트렌드는 미확인 → 재료와 동일 처리)
+ */
+export interface TrendBonus {
+  mul: number;
+  add: number;
+}
+
+export const zeroTrend = (): TrendBonus => ({ mul: 0, add: 0 });
+
+export const addTrend = (a: TrendBonus, b: TrendBonus): TrendBonus => ({ mul: a.mul + b.mul, add: a.add + b.add });
+
+/** 판매가 곱연산 버프가 트렌드 계수에도 적용되는 트렌드인지 */
+export function trendIsMultiplied(trend: Trend): boolean {
+  return trend.kind === 'tag';
+}
+
 /** 음식에 적용되는 트렌드 계수 (미적용 시 0) */
-export function trendBonus(trend: Trend, food: Food, constants: Constants): number {
-  // 수익은 트렌드 계수 합에 선형이므로, 평균 계수로 계산한 수익 = 전체 트렌드 수익의 평균
+export function trendBonus(trend: Trend, food: Food, constants: Constants): TrendBonus {
+  // 수익은 트렌드 계수(mul, add) 각각에 선형이므로, 평균 계수로 계산한 수익 = 전체 트렌드 수익의 평균
   const m = trend.match;
   if (m.type === 'average') {
-    if (!m.trends.length) return 0;
-    return m.trends.reduce((s, t) => s + trendBonus(t, food, constants), 0) / m.trends.length;
+    if (!m.trends.length) return zeroTrend();
+    const sum = m.trends.reduce((s, t) => addTrend(s, trendBonus(t, food, constants)), zeroTrend());
+    return { mul: sum.mul / m.trends.length, add: sum.add / m.trends.length };
   }
-  return trendApplies(trend, food) ? trendCoef(trend, constants) : 0;
+  if (!trendApplies(trend, food)) return zeroTrend();
+  const coef = trendCoef(trend, constants);
+  return trendIsMultiplied(trend) ? { mul: coef, add: 0 } : { mul: 0, add: coef };
 }

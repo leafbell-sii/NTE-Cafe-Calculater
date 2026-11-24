@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { loadGameData, validateData } from '../data/load';
 import type { GameData, Staff, Trend } from '../types';
-import { calculate, EPS, type SortBy } from './calc';
+import { calculate, EPS, foodCoefOf, zeroBuffs, type SortBy } from './calc';
 import { compareIdx, optimize, swapLines } from './optimize';
 import { buildTrends, NONE_TREND } from './trends';
 import foods from '../data/foods.json';
@@ -83,7 +83,8 @@ describe('트렌드', () => {
       popularity: 0,
       constants: data.constants, ingredients: data.ingredients,
     });
-    expect(r.foods[0].trend).toBe(0.75);
+    expect(r.foods[0].trendAdd).toBe(0.75);
+    expect(r.foods[0].trendMul).toBe(0);
   });
   it('태그 트렌드 계수는 1.00', () => {
     const r = calculate({
@@ -93,7 +94,25 @@ describe('트렌드', () => {
       popularity: 0,
       constants: data.constants, ingredients: data.ingredients,
     });
-    expect(r.foods[0].trend).toBe(1.0);
+    expect(r.foods[0].trendMul).toBe(1.0);
+    expect(r.foods[0].trendAdd).toBe(0);
+  });
+  it('태그 트렌드 계수는 판매가 곱연산을 받고, 과일 트렌드는 받지 않는다', () => {
+    const menu = [food('hot-orange-coffee')];
+    const priceMul = 0.1;
+    const constants = data.constants;
+    const staff: Staff[] = [];
+    const base = (t: Trend) => calculate({ menu, staff, trend: t, popularity: 0, constants, ingredients: data.ingredients });
+    // 버프 없이 곱연산만 직접 확인: coef = (price + A + tMul)(1 + M) + tAdd
+    const tag = base(trend('tag:음료')).foods[0];
+    const fruit = base(trend('group:fruit')).foods[0];
+    const price = menu[0].price;
+    expect(tag.coef).toBeCloseTo(price + 1.0, 10);
+    expect(fruit.coef).toBeCloseTo(price + 0.75, 10);
+    // 곱연산 버프가 있을 때의 계산식 (revenueOf 인수분해 형태와 영수증 일치)
+    const b = { ...zeroBuffs(), priceMul };
+    expect(foodCoefOf(price, { mul: 1.0, add: 0 }, 1, b)).toBeCloseTo((price + 1.0) * 1.1, 10);
+    expect(foodCoefOf(price, { mul: 0, add: 0.75 }, 1, b)).toBeCloseTo(price * 1.1 + 0.75, 10);
   });
   it('범용(평균) 트렌드 수익 = 전체 트렌드 수익의 평균', () => {
     const all = buildTrends(data);
@@ -138,7 +157,7 @@ describe('계산', () => {
     });
     expect(r.buffs.priceAdd).toBeCloseTo(0.6, 12);
   });
-  it('트렌드 계수는 판매가 곱연산 뒤에 더한다 (인게임 티라미수 19.87)', () => {
+  it('재료 트렌드 계수는 판매가 곱연산 뒤에 더한다 (인게임 티라미수 19.87)', () => {
     // 라크리모사·나나리 제외 전원 Lv5, 커피 원두 트렌드 1등 조합
     const menu = ['hot-orange-coffee', 'crispy-coconut-cookie-macchiato', 'snowy-matcha-latte', 'tiramisu', 'caramel-choco-crepe'].map(food);
     const staff: Staff[] = ['sakiri', 'baekjang', 'daffodil', 'edgar', 'shinku', 'rinko', 'akane-rin', 'umitsuki', 'haniel', 'iroi'].map(
