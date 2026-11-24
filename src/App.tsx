@@ -9,6 +9,7 @@ import { DataErrors } from './components/DataErrors';
 import { BUG_REPORT_URL } from './config';
 import { applyShareCode, buildShareUrl, copyText } from './share';
 import { nonNegNumber, oneOf, usePersistentState } from './persist';
+import { THEME_LABEL, useTheme } from './theme';
 
 const loaded = loadGameData();
 
@@ -37,6 +38,7 @@ function Calculator({ data }: { data: GameData }) {
           <CupIcon />
         </span>
         <h1>별미 카페 계산기</h1>
+        <ThemeButton />
       </header>
 
       <main className="layout">
@@ -147,5 +149,15 @@ function CupIcon() {
       <line x1="10" x2="10" y1="2" y2="4" />
       <line x1="14" x2="14" y1="2" y2="4" />
     </svg>
+  );
+}
+
+function ThemeButton() {
+  const { pref, theme, cycle } = useTheme();
+  return (
+    <button className="theme-btn" onClick={cycle} title="테마 바꾸기 (시스템 → 다크 → 라이트)" aria-label={`테마: ${THEME_LABEL[pref]}`}>
+      <span aria-hidden>{theme === 'dark' ? '☾' : '☀'}</span>
+      {THEME_LABEL[pref]}
+    </button>
   );
 }

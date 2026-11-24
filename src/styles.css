@@ -1,4 +1,4 @@
-/* Neon Night Café — 다크 기본, prefers-color-scheme: light 에서 라이트 테마 */
+/* Neon Night Café — 다크 기본, html[data-theme='light'] 에서 라이트 테마 (src/theme.ts) */
 :root {
   --primary: #2ef2e2;
   --on-primary: #04201e;
@@ -42,36 +42,34 @@
   color-scheme: dark;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --primary: #00706b;
-    --on-primary: #fff;
-    --primary-soft: #ddf5f3;
-    --secondary: #6d4ce0;
-    --on-secondary: #fff;
-    --secondary-soft: #ece6fd;
-    --bg: #f6f4fb;
-    --surface: #fff;
-    --surface-2: #eeeaf7;
-    --sunken: #e6e1f2;
-    --border: #dad3ec;
-    --border-strong: #b9aed6;
-    --text: #17122a;
-    --text-2: #514870;
-    --text-3: #625a82;
-    --main: #a24a26;
-    --main-soft: #fbe6dc;
-    --dessert: #9e3d6d;
-    --dessert-soft: #f9e2ee;
-    --drink: #2a6594;
-    --drink-soft: #deedf8;
-    --trend: #8f6400;
-    --positive: #2a6e43;
-    --negative: #c4314f;
-    --glow: rgb(0 112 107 / 22%);
-    --shadow: 0 1px 2px rgb(23 18 42 / 6%);
-    color-scheme: light;
-  }
+:root[data-theme='light'] {
+  --primary: #00706b;
+  --on-primary: #fff;
+  --primary-soft: #ddf5f3;
+  --secondary: #6d4ce0;
+  --on-secondary: #fff;
+  --secondary-soft: #ece6fd;
+  --bg: #f6f4fb;
+  --surface: #fff;
+  --surface-2: #eeeaf7;
+  --sunken: #e6e1f2;
+  --border: #dad3ec;
+  --border-strong: #b9aed6;
+  --text: #17122a;
+  --text-2: #514870;
+  --text-3: #625a82;
+  --main: #a24a26;
+  --main-soft: #fbe6dc;
+  --dessert: #9e3d6d;
+  --dessert-soft: #f9e2ee;
+  --drink: #2a6594;
+  --drink-soft: #deedf8;
+  --trend: #8f6400;
+  --positive: #2a6e43;
+  --negative: #c4314f;
+  --glow: rgb(0 112 107 / 22%);
+  --shadow: 0 1px 2px rgb(23 18 42 / 6%);
+  color-scheme: light;
 }
 
 * {
@@ -147,6 +145,28 @@ code {
   padding: 14px 0 12px;
   margin-bottom: 16px;
   border-bottom: 1px solid var(--border);
+}
+.theme-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color var(--fast),
+    color var(--fast);
+}
+.theme-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 .logo {
   width: 32px;
