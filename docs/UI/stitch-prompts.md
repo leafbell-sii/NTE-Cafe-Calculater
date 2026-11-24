@@ -78,6 +78,13 @@
 - 차수별 **필수 체크**를 모두 통과하고,
 - A~F 중 2점 이하가 없고, 평균 3.5점 이상.
 - 통과 못 하면: 해당 차수의 「수정 프롬프트」를 1개씩 적용 (한 번에 하나). 2회 수정해도 안 되면 그 차수를 다시 생성합니다.
+- 1점 항목이 있으면 수정하지 않고 바로 다시 생성합니다.
+- 다시 생성하는 방법:
+  1. D가 1점이었다면 먼저 0차(design.md 적용)를 다시 확인합니다. 적용이 안 됐으면 다시 import하고, import가 안 되면 프롬프트에 design.md를 첨부합니다.
+  2. 화면 선택:
+     - 새 화면 차수(1차·6차)는 실패한 화면을 선택하지 **않은** 상태에서, 같은 프로젝트에 **새 화면**으로 생성합니다. 실패한 화면을 선택한 채로 입력하면 수정으로 처리되어 기존 색·장식이 남습니다.
+     - 수정 차수(2~5차, 7차)는 실패한 결과 대신 **직전 차수의 통과 화면**을 다시 선택하고 입력합니다.
+  3. 첨부는 원래 차수와 같게 하고, 그 차수에 「추가 프롬프트」가 있으면 본 프롬프트 끝에 붙여 입력합니다.
 - 통과한 결과는 **스크린샷을 저장**해 두세요 (가이드 권장: 수정이 앞 결과를 망칠 수 있음).
 
 ### 1.3 D(토큰)·F(구현성) — Claude 평가
@@ -222,6 +229,16 @@ Below it, 4 collapsed one-line rows:
 Then a wide button "더 보기 (+10)".
 
 Right column (200px), panel "기타": button "🔗 설정 공유 링크"; input "공유 링크 또는 코드" with button "적용"; button "🐞 버그 제보"; small note "기본 유동인구 2400P" / "트렌드 계수 +0.75 (태그 +1.00)"; at the bottom a quiet small link "수동 계산 (테스트용)".
+```
+
+**추가 프롬프트** (약 520자)
+
+- 언제: 1차 프롬프트 **끝에 한 문단으로 붙여** 함께 입력합니다. 첫 생성에도 붙이는 것을 권장하고, 재생성할 때는 반드시 붙입니다.
+- 왜: 첫 시도에서 design.md 색이 적용되지 않았고(D 1점), 그라데이션 테두리·blur 같은 장식이 붙었으며(F 2점), 헤더에 모드 토글이 생겼습니다(A).
+- 본 프롬프트와 합쳐도 3,000자 이하입니다.
+
+```text
+Use only the DESIGN.md colors: background #0D0A17, panels #161226, #1 card #201A35, cyan #2EF2E2 only on the #1 card border, rank badges, the active segmented button and percentages; level badges #A78BFA; tags 메인 메뉴 #FF9A5C, 디저트 #FF7EC8, 음료 #5CB8FF; ★ #FFD54A. Numbers in Space Grotesk with tabular figures. Keep decoration simple: one outer glow on the #1 card only, solid opaque panels, no gradient borders or backdrop blur. The header has only the logo and title, with no mode switch or version badge.
 ```
 
 **필수 체크**
