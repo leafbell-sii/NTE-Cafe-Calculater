@@ -1,5 +1,5 @@
 import type { EffectKind } from '../types';
-import { conditionLabel, type EffectLine, type Receipt } from '../logic/calc';
+import { conditionLabel, INGREDIENT_TRAFFIC_DIV, type EffectLine, type Receipt } from '../logic/calc';
 import { fmt, fmt2, pct } from '../format';
 
 const isTraffic = (k: EffectKind) => k === 'trafficAdd' || k === 'trafficMul';
@@ -146,13 +146,13 @@ export function ReceiptView({ receipt: r }: { receipt: Receipt }) {
             <span className="r-val">{coef(r.reduceCoef)}</span>
           </li>
           <li className="r-sub">
-            시간당 소모량 = {fmt2(r.traffic)}P ÷ 10000 × 사용 개수 × {coef(r.reduceCoef)}
+            시간당 소모량 = {fmt2(r.traffic)}P ÷ {fmt(INGREDIENT_TRAFFIC_DIV)} × 사용 개수 × {coef(r.reduceCoef)}
           </li>
           {r.ingredients.length === 0 && <li className="r-row muted">메뉴 없음</li>}
           {r.ingredients.map((l) => (
             <li key={l.name} className="r-row">
               <span>
-                {l.name} <span className="cond">×{l.uses}</span>
+                {l.name} <span className="cond">×{fmt(l.uses)}</span>
               </span>
               <span className="r-val">
                 {fmt2(l.perHour)}개 × {fmt(l.price)} = {fmt2(l.cost)}
