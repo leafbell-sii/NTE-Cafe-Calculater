@@ -34,17 +34,9 @@ function Calculator({ data }: { data: GameData }) {
     <div className="app">
       <header className="header">
         <span className="logo" aria-hidden>
-          ☕
+          <CupIcon />
         </span>
         <h1>별미 카페 계산기</h1>
-        <div className="mode-toggle" role="group" aria-label="모드">
-          <button aria-pressed={mode === 'optimize'} onClick={() => setMode('optimize')}>
-            최적화
-          </button>
-          <button aria-pressed={mode === 'manual'} onClick={() => setMode('manual')}>
-            수동
-          </button>
-        </div>
       </header>
 
       <main className="layout">
@@ -65,7 +57,13 @@ function Calculator({ data }: { data: GameData }) {
         {mode === 'optimize' ? (
           <OptimizeMode data={data} trend={trend} popularity={popularity} maneki={maneki} />
         ) : (
-          <ManualMode data={data} trend={trend} popularity={popularity} maneki={maneki} />
+          <ManualMode
+            data={data}
+            trend={trend}
+            popularity={popularity}
+            maneki={maneki}
+            onExit={() => setMode('optimize')}
+          />
         )}
 
         <aside className="panel etc" aria-label="기타">
@@ -73,15 +71,19 @@ function Calculator({ data }: { data: GameData }) {
           <ShareButton />
           <ShareCodeInput />
           {BUG_REPORT_URL && (
-            <a className="chip-btn report-btn" href={BUG_REPORT_URL} target="_blank" rel="noopener noreferrer">
+            <a className="btn report-btn" href={BUG_REPORT_URL} target="_blank" rel="noopener noreferrer">
               🐞 버그 제보
             </a>
           )}
           <p className="etc-note">
-            기본 유동인구 {data.constants.baseTraffic}P
+            기본 유동인구 <b>{data.constants.baseTraffic}P</b>
             <br />
-            트렌드 계수 +{data.constants.trendBonus} (태그 +{data.constants.tagTrendBonus.toFixed(2)})
+            트렌드 계수 <b>+{data.constants.trendBonus}</b> (태그 <b>+{data.constants.tagTrendBonus.toFixed(2)}</b>)
           </p>
+          {/* SPEC 3.2: 수동 모드는 눈에 띄지 않는 작은 링크로만 진입 */}
+          <button className="link-quiet" onClick={() => setMode(mode === 'optimize' ? 'manual' : 'optimize')}>
+            {mode === 'optimize' ? '수동 계산 (테스트용)' : '최적화 모드로 돌아가기'}
+          </button>
         </aside>
       </main>
     </div>
@@ -110,7 +112,7 @@ function ShareCodeInput() {
           setError(false);
         }}
       />
-      <button type="submit" className="chip-btn" disabled={!text.trim()}>
+      <button type="submit" className="btn" disabled={!text.trim()}>
         {error ? '잘못된 코드' : '적용'}
       </button>
     </form>
@@ -130,8 +132,20 @@ function ShareButton() {
     setTimeout(() => setMsg(''), 1500);
   };
   return (
-    <button className="chip-btn" onClick={onClick} title="현재 설정이 담긴 링크를 복사합니다">
+    <button className="btn" onClick={onClick} title="현재 설정이 담긴 링크를 복사합니다">
       🔗 {msg || '설정 공유 링크'}
     </button>
+  );
+}
+
+function CupIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 8h1a4 4 0 1 1 0 8h-1" />
+      <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z" />
+      <line x1="6" x2="6" y1="2" y2="4" />
+      <line x1="10" x2="10" y1="2" y2="4" />
+      <line x1="14" x2="14" y1="2" y2="4" />
+    </svg>
   );
 }

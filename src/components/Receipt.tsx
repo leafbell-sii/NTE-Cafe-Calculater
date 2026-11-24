@@ -137,7 +137,7 @@ export function ReceiptView({ receipt: r }: { receipt: Receipt }) {
       </section>
 
       <section>
-        <h4>7. 식재료 소모</h4>
+        <h4 className="neg">7. 식재료 소모</h4>
         <ul>
           <li className="r-sub">소모 감소</li>
           <EffectRows lines={reduce} />
@@ -167,7 +167,7 @@ export function ReceiptView({ receipt: r }: { receipt: Receipt }) {
       </section>
 
       <section className="r-final">
-        <h4>8. 순수익</h4>
+        <h4 className="pos">8. 순수익</h4>
         <p>
           {fmt2(r.revenue)} − {fmt2(r.ingredientCost)} = <b>{fmt2(r.net)}</b> 폰즈
         </p>

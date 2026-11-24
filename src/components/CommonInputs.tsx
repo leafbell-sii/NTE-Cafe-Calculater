@@ -37,21 +37,26 @@ export function CommonInputs({ trends, trendId, onTrend, popularity, onPopularit
 
   return (
     <div className="common-inputs">
-      <label className="hfield">
-        <span className="hfield-label">인기도</span>
+      <label className="field">
+        <span className="field-head">
+          <span className="field-label">인기도</span>
+          <span className="field-help num">×{exact.format(1 + popularity)}</span>
+        </span>
         <input
           type="text"
           inputMode="decimal"
+          className="num"
           placeholder="0"
           value={text}
           onChange={(e) => onText(e.target.value)}
           title="게임 표기 그대로 (예: 0.015)"
         />
-        <span className="hfield-help">×{exact.format(1 + popularity)}</span>
       </label>
 
-      <label className="hfield">
-        <span className="hfield-label">트렌드</span>
+      <label className="field">
+        <span className="field-head">
+          <span className="field-label">트렌드</span>
+        </span>
         <select value={trendId} onChange={(e) => onTrend(e.target.value)}>
           {top.map((t) => (
             <option key={t.id} value={t.id}>
@@ -72,10 +77,10 @@ export function CommonInputs({ trends, trendId, onTrend, popularity, onPopularit
         </select>
       </label>
 
-      <label className="hfield hcheck" title="유동인구 곱연산 버프에 합산됩니다">
+      <label className="check-row" title="유동인구 곱연산 버프에 합산됩니다">
         <input type="checkbox" checked={maneki} onChange={(e) => onManeki(e.target.checked)} />
-        <span className="hfield-label">마네키네코</span>
-        <span className="hfield-help">유동인구 +{exact.format(manekiTrafficMul * 100)}%</span>
+        <span className="field-label">마네키네코</span>
+        <span className="field-help">유동인구 +{exact.format(manekiTrafficMul * 100)}%</span>
       </label>
     </div>
   );
